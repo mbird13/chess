@@ -37,14 +37,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
 
@@ -57,57 +57,36 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.BISHOP) {
-            List<ChessMove> moves = new ArrayList<ChessMove>();
-            //moves up to the right
-            int rowIter = myPosition.getRow() + 1;
-            int colIter = myPosition.getColumn() + 1;
-            for (rowIter = myPosition.getRow() + 1; rowIter <= 8; rowIter++) {
-                ChessPosition checkPosition=new ChessPosition(rowIter, colIter);
-                if (board.getPiece(checkPosition) == null) {
-                    ChessMove newMove=new ChessMove(myPosition, checkPosition, null);
-                    moves.add(newMove);
-                } else break;
-                colIter++;
-                if (colIter > 8) break;
-            }
-            //moves down to the left
-            colIter = myPosition.getColumn() - 1;
-            for (rowIter = myPosition.getRow() - 1; rowIter > 0; rowIter--) {
-                ChessPosition checkPosition=new ChessPosition(rowIter, colIter);
-                if (board.getPiece(checkPosition) == null) {
-                    ChessMove newMove=new ChessMove(myPosition, checkPosition, null);
-                    moves.add(newMove);
-                } else break;
-                colIter--;
-                if (colIter <= 0) break;
-            }
-            //moves up to the left
-            colIter = myPosition.getColumn() - 1;
-            for (rowIter = myPosition.getRow() + 1; rowIter <= 8; rowIter++) {
-                ChessPosition checkPosition=new ChessPosition(rowIter, colIter);
-                if (board.getPiece(checkPosition) == null) {
-                    ChessMove newMove=new ChessMove(myPosition, checkPosition, null);
-                    moves.add(newMove);
-                } else break;
-                colIter--;
-                if (colIter <= 0) break;
-            }
-            //moves down to the right
-            colIter = myPosition.getColumn() + 1;
-            for (rowIter = myPosition.getRow() - 1; rowIter > 0; rowIter--) {
-                ChessPosition checkPosition=new ChessPosition(rowIter, colIter);
-                if (board.getPiece(checkPosition) == null) {
-                    ChessMove newMove=new ChessMove(myPosition, checkPosition, null);
-                    moves.add(newMove);
-                } else break;
-                colIter++;
-                if (colIter > 8) break;
-            }
+            BishopMoveCalculator moveCalculator = new BishopMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
             return moves;
             }
-        else {
-            throw new RuntimeException("Not implemented");
+        else if (type == PieceType.QUEEN){
+            QueenMoveCalculator moveCalculator = new QueenMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
+            return moves;
         }
+        else if (type == PieceType.KING){
+            KingMoveCalculator moveCalculator = new KingMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
+            return moves;
+        }
+        else if (type == PieceType.PAWN){
+            PawnMoveCalculator moveCalculator = new PawnMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
+            return moves;
+        }
+        else if (type == PieceType.KNIGHT){
+            KnightMoveCalculator moveCalculator = new KnightMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
+            return moves;
+        }
+        else if (type == PieceType.ROOK){
+            RookMoveCalculator moveCalculator = new RookMoveCalculator();
+            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
+            return moves;
+        }
+        throw new RuntimeException("Invalid piece type");
     }
 
     @Override

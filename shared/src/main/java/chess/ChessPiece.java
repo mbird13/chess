@@ -58,33 +58,27 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.BISHOP) {
             BishopMoveCalculator moveCalculator = new BishopMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
             }
         else if (type == PieceType.QUEEN){
             QueenMoveCalculator moveCalculator = new QueenMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
         }
         else if (type == PieceType.KING){
             KingMoveCalculator moveCalculator = new KingMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
         }
         else if (type == PieceType.PAWN){
             PawnMoveCalculator moveCalculator = new PawnMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
         }
         else if (type == PieceType.KNIGHT){
             KnightMoveCalculator moveCalculator = new KnightMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
         }
         else if (type == PieceType.ROOK){
             RookMoveCalculator moveCalculator = new RookMoveCalculator();
-            List<ChessMove> moves = moveCalculator.validMoves(board, myPosition, pieceColor);
-            return moves;
+            return moveCalculator.validMoves(board, myPosition, pieceColor);
         }
         throw new RuntimeException("Invalid piece type");
     }

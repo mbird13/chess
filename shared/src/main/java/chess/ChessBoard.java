@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -42,7 +43,16 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (ChessPiece[] rows : squares) {
+            for (ChessPiece square : rows) {
+                square = null;
+            }
+        }
+        for (int i = 1; i <=8; i++) {
+            ChessPosition position = new ChessPosition(2, i);
+            ChessPiece whitePawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            addPiece(position, whitePawn);
+        }
     }
 
     @Override
@@ -56,5 +66,20 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.hashCode(squares);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder r =new StringBuilder();
+        for (ChessPiece[] rows : squares) {
+            for (ChessPiece square : rows) {
+                r.append("|");
+                if (square != null) {
+                    r.append(square.toString());
+                }
+                else r.append(" ");
+            }
+        }
+        return r.toString();
     }
 }

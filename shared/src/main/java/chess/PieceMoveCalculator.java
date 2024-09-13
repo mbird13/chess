@@ -9,21 +9,43 @@ abstract class PieceMoveCalculator {
   protected List<ChessPosition> exploreDirection(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor myColor, int rowDir, int colDir) {
     ChessPosition newPosition = new ChessPosition(myPosition.getRow() + rowDir, myPosition.getColumn() + colDir);
     var moves = new ArrayList<ChessPosition>();
-    if (isInBounds(newPosition.getRow(), newPosition.getColumn())) {
-      if (board.getPiece(newPosition) == null) {
-        moves.add(newPosition);
-        moves.addAll(exploreDirection(board, newPosition, myColor, rowDir, colDir));
-      }
-      else if (board.getPiece(newPosition).getTeamColor() != myColor) {
-        moves.add(newPosition);
-      }
+    if (isValidMoveNoCapture(board, newPosition)) {
+      moves.add(newPosition);
+      moves.addAll(exploreDirection(board, newPosition, myColor, rowDir, colDir));
     }
+    else if(isValidCapture(board, newPosition, myColor)) {
+      moves.add(newPosition);
+    }
+
+//    if (isInBounds(newPosition.getRow(), newPosition.getColumn())) {
+//      if (board.getPiece(newPosition) == null) {
+//        moves.add(newPosition);
+//        moves.addAll(exploreDirection(board, newPosition, myColor, rowDir, colDir));
+//      }
+//      else if (board.getPiece(newPosition).getTeamColor() != myColor) {
+//        moves.add(newPosition);
+//      }
+//    }
 
     return moves;
   }
 
   protected boolean isInBounds(int row, int col) {
     return row <= 8 && row >= 1 && col <= 8 && col >= 1;
+  }
+
+  protected boolean isValidCapture(ChessBoard board, ChessPosition position, ChessGame.TeamColor myColor) {
+    if (isInBounds(position.getRow(), position.getColumn()) && board.getPiece(position) != null) {
+      return board.getPiece(position).getTeamColor() != myColor;
+    }
+    return false;
+  }
+
+  protected boolean isValidMoveNoCapture(ChessBoard board, ChessPosition position) {
+    if (isInBounds(position.getRow(), position.getColumn())) {
+      return board.getPiece(position) == null;
+    }
+    return false;
   }
 }
 
@@ -73,16 +95,33 @@ class QueenMoveCalculator extends PieceMoveCalculator {
 
 class KnightMoveCalculator extends PieceMoveCalculator {
   public List<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor myColor) {
+    int[][] knightMoves = {
+            {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+            {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+    };
     List<ChessMove> moves = new ArrayList<ChessMove>();
-
+    for (int[] knightMove : knightMoves) {
+      var newPosition = new ChessPosition(myPosition.getRow() + knightMove[0], myPosition.getColumn() + knightMove[1]);
+      if (isValidMoveNoCapture(board, newPosition) || isValidCapture(board, newPosition, myColor)) {
+        moves.add(new ChessMove(myPosition, newPosition, null));
+      }
+    }
     return moves;
   }
 }
 
 class KingMoveCalculator extends PieceMoveCalculator {
   public List<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor myColor) {
+    int[][] kingMoves = {
+            {1,0}, {1,1}, {1,-1}, {0,1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}
+    };
     List<ChessMove> moves = new ArrayList<ChessMove>();
-
+    for (int[] kingMove : kingMoves) {
+      var newPosition = new ChessPosition(myPosition.getRow() + kingMove[0], myPosition.getColumn() + kingMove[1]);
+      if (isValidMoveNoCapture(board, newPosition) || isValidCapture(board, newPosition, myColor)) {
+        moves.add(new ChessMove(myPosition, newPosition, null));
+      }
+    }
     return moves;
   }
 }

@@ -95,4 +95,28 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(pieceColor, type);
     }
+
+    @Override
+    public String toString() {
+        if (type == PieceType.PAWN) {
+            return "p";
+        }
+        if (type == PieceType.ROOK) {
+            return "r";
+        }
+        if (type == PieceType.QUEEN) {
+            return "q";
+
+        }
+        if (type == PieceType.KNIGHT) {
+            return "n";
+        }
+        if (type == PieceType.KING) {
+            return "k";
+        }
+        if (type == PieceType.BISHOP) {
+            return "b";
+        }
+        else return "not valid piece type";
+    }
 }

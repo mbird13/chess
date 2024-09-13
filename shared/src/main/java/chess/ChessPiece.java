@@ -98,25 +98,30 @@ public class ChessPiece {
 
     @Override
     public String toString() {
+        StringBuilder r = new StringBuilder();
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            r.append("w");
+        }
         if (type == PieceType.PAWN) {
-            return "p";
+            r.append("p");
         }
-        if (type == PieceType.ROOK) {
-            return "r";
+        else if (type == PieceType.ROOK) {
+            r.append("r");
         }
-        if (type == PieceType.QUEEN) {
-            return "q";
+        else if (type == PieceType.QUEEN) {
+            r.append("q");
 
         }
-        if (type == PieceType.KNIGHT) {
-            return "n";
+        else if (type == PieceType.KNIGHT) {
+            r.append("n");
         }
-        if (type == PieceType.KING) {
-            return "k";
+        else if (type == PieceType.KING) {
+            r.append("k");
         }
-        if (type == PieceType.BISHOP) {
-            return "b";
+        else if (type == PieceType.BISHOP) {
+            r.append("b");
         }
         else return "not valid piece type";
+        return r.toString();
     }
 }

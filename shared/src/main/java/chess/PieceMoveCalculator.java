@@ -199,16 +199,16 @@ class PawnMoveCalculator extends PieceMoveCalculator {
         }
       }
       if (myPosition.getRow() - 1 == 1) {
-        for (ChessPosition endPostion : validPositions) {
-          moves.add(new ChessMove(myPosition, endPostion, ChessPiece.PieceType.BISHOP));
-          moves.add(new ChessMove(myPosition, endPostion, ChessPiece.PieceType.QUEEN));
-          moves.add(new ChessMove(myPosition, endPostion, ChessPiece.PieceType.ROOK));
-          moves.add(new ChessMove(myPosition, endPostion, ChessPiece.PieceType.KNIGHT));
+        for (ChessPosition endPosition : validPositions) {
+          moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
+          moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
+          moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
+          moves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
         }
       }
       else {
-        for (ChessPosition endPostion : validPositions) {
-          moves.add(new ChessMove(myPosition, endPostion, null));
+        for (ChessPosition endPosition : validPositions) {
+          moves.add(new ChessMove(myPosition, endPosition, null));
         }
       }
     }

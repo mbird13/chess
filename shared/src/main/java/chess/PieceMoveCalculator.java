@@ -76,8 +76,7 @@ class QueenMoveCalculator extends PieceMoveCalculator {
   public List<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor myColor) {
     BishopMoveCalculator bishopMoves = new BishopMoveCalculator();
     RookMoveCalculator rookMoves = new RookMoveCalculator();
-    List<ChessMove> moves = new ArrayList<>();
-    moves.addAll(bishopMoves.validMoves(board, myPosition, myColor));
+    List<ChessMove> moves = bishopMoves.validMoves(board, myPosition, myColor);
     moves.addAll(rookMoves.validMoves(board, myPosition, myColor));
     return moves;
   }
@@ -118,7 +117,6 @@ class KingMoveCalculator extends PieceMoveCalculator {
 
 class PawnMoveCalculator extends PieceMoveCalculator {
   public List<ChessMove> validMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor myColor) {
-    //for en passante: add
 
     List<ChessPosition> validPositions = new ArrayList<ChessPosition>();
     List<ChessMove> moves = new ArrayList<ChessMove>();

@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -70,8 +72,25 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = board.findPiece(teamColor, ChessPiece.PieceType.KING);
+        List<ChessPosition> enemyPositions=board.getPositions(TeamColor.BLACK);
+        if (teamColor == TeamColor.BLACK) {
+            enemyPositions = board.getPositions(TeamColor.WHITE);
+        }
+
+        for (ChessPosition enemyPosition : enemyPositions) {
+            Collection<ChessMove> enemyMoves = board.getPiece(enemyPosition).pieceMoves(board, enemyPosition);
+
+            for (ChessMove enemyMove : enemyMoves) {
+                if (enemyMove.getEndPosition().equals(kingPosition)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+
+
 
     /**
      * Determines if the given team is in checkmate

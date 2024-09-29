@@ -133,7 +133,8 @@ class PawnMoveCalculator extends PieceMoveCalculator {
     ChessPosition twoForward = new ChessPosition(myPosition.getRow() + 2 * direction, myPosition.getColumn());
     ChessPosition diagonalLeft = new ChessPosition(myPosition.getRow() + direction, myPosition.getColumn() - 1);
     ChessPosition diagonalRight = new ChessPosition(myPosition.getRow() + direction, myPosition.getColumn() + 1);
-
+    ChessPosition left = new ChessPosition(myPosition.getRow(), myPosition.getColumn()-1);
+    ChessPosition right = new ChessPosition(myPosition.getRow(), myPosition.getColumn()+1);
 
     if (isValidMoveNoCapture(board, oneForward)) {
       validPositions.add(oneForward);
@@ -146,6 +147,14 @@ class PawnMoveCalculator extends PieceMoveCalculator {
       validPositions.add(diagonalLeft);
     }
     if (isValidCapture(board, diagonalRight, myColor)) {
+      validPositions.add(diagonalRight);
+    }
+
+    //En Passante
+    if (isValidCapture(board, left, myColor) && board.getPiece(left).getEnPassantStatus()) {
+      validPositions.add(diagonalLeft);
+    }
+    if (isValidCapture(board, right, myColor) && board.getPiece(right).getEnPassantStatus()) {
       validPositions.add(diagonalRight);
     }
 

@@ -88,6 +88,7 @@ public class ChessBoard {
                 }
                 else r.append(" ");
             }
+            r.append("\n");
         }
         return r.toString();
     }

@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,6 +13,16 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
+
+    public boolean getEnPassantStatus() {
+        return enPassantStatus;
+    }
+
+    public void setEnPassantStatus(boolean enPassanteStatus) {
+        this.enPassantStatus=enPassanteStatus;
+    }
+
+    private boolean enPassantStatus= false;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor=pieceColor;

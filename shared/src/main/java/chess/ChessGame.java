@@ -3,7 +3,6 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -54,20 +53,25 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece myPiece = board.getPiece(startPosition);
-        List<ChessMove> moves = new ArrayList<>();
-        if (myPiece == null) {return moves;}
+        if (myPiece == null) {return null;}
 
-        moves.addAll(myPiece.pieceMoves(board, startPosition));
+        List<ChessMove> moves = new ArrayList<>(myPiece.pieceMoves(board, startPosition));
+
         List<ChessMove> invalidMoves = new ArrayList<>();
         for (ChessMove move : moves) {
-            ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+            ChessPosition capturedPiecePosition = move.getEndPosition();
+            if(isEnPassant(move)) {
+                capturedPiecePosition = new ChessPosition(move.getStartPosition().getRow(), move.getEndPosition().getColumn());
+            }
+            ChessPiece capturedPiece = board.getPiece(capturedPiecePosition);
+
             board.makeMove(move);
             if (isInCheck(myPiece.getTeamColor())) {
                 invalidMoves.add(move);
             }
             board.makeMove(new ChessMove(move.getEndPosition(), move.getStartPosition(), null));
             if (capturedPiece != null) {
-                board.addPiece(move.getEndPosition(), capturedPiece);
+                board.addPiece(capturedPiecePosition, capturedPiece);
             }
         }
         moves.removeAll(invalidMoves);
@@ -82,11 +86,39 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
-        if (!validMoves.contains(move) || teamTurn != board.getPiece(move.getStartPosition()).getTeamColor()) {
+        if (validMoves == null || !validMoves.contains(move) || teamTurn != board.getPiece(move.getStartPosition()).getTeamColor()) {
             throw new InvalidMoveException("Invalid Move");
         }
+        checkEnPassant(move);
         board.makeMove(move);
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        resetEnemyEnPassant(teamTurn);
+    }
+
+    private void resetEnemyEnPassant(TeamColor teamTurn) {
+        List<ChessPosition> enemyPositions = board.getPositions(teamTurn);
+        for (ChessPosition position : enemyPositions) {
+            board.getPiece(position).setEnPassantStatus(false);
+        }
+    }
+
+    private void checkEnPassant(ChessMove move) {
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        int moveDistance = move.getEndPosition().getRow() - move.getStartPosition().getRow();
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && (moveDistance == 2 || moveDistance == -2)) {
+            piece.setEnPassantStatus(true);
+        }
+
+        if(isEnPassant(move)) {
+            ChessPosition capturedPawnPosition = new ChessPosition(move.getStartPosition().getRow(), move.getEndPosition().getColumn());
+            board.addPiece(capturedPawnPosition, null);
+        }
+    }
+
+    private boolean isEnPassant(ChessMove move) {
+        return board.getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.PAWN
+                && move.getStartPosition().getColumn() != move.getEndPosition().getColumn()
+                && board.getPiece(move.getEndPosition()) == null;
     }
 
     /**

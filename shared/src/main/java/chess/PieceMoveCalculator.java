@@ -111,7 +111,29 @@ class KingMoveCalculator extends PieceMoveCalculator {
         moves.add(new ChessMove(myPosition, newPosition, null));
       }
     }
+
+    //Castling
+    if ( isInStartPosition(myPosition, myColor)) {
+      var left = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1);
+      var right = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1);
+      var leftTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 2);
+      var rightTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 2);
+      if (isValidMoveNoCapture(board, left) && isValidMoveNoCapture(board, leftTwo)) {
+        moves.add(new ChessMove(myPosition, leftTwo, null));
+      }
+      if (isValidMoveNoCapture(board, right) && isValidMoveNoCapture(board, rightTwo)) {
+        moves.add(new ChessMove(myPosition, rightTwo, null));
+      }
+    }
     return moves;
+  }
+
+  private boolean isInStartPosition(ChessPosition myPosition, ChessGame.TeamColor myColor) {
+    ChessPosition startPosition = new ChessPosition(1, 5);
+    if (myColor == ChessGame.TeamColor.BLACK) {
+      startPosition = new ChessPosition(8,5);
+    }
+    return myPosition == startPosition;
   }
 }
 
@@ -150,7 +172,7 @@ class PawnMoveCalculator extends PieceMoveCalculator {
       validPositions.add(diagonalRight);
     }
 
-    //En Passante
+    //En Passant
     if (isValidCapture(board, left, myColor) && board.getPiece(left).getEnPassantStatus()) {
       validPositions.add(diagonalLeft);
     }

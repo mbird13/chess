@@ -76,7 +76,36 @@ public class ChessGame {
                 }
             }
             else {
+                boolean isInvalid = false;
                 //move king and Rook
+                int moveDistance = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+                ChessPosition rookPosition = new ChessPosition(move.getStartPosition().getRow(), 8);
+                if (moveDistance < 0) {
+                    rookPosition = new ChessPosition(move.getStartPosition().getRow(), 1);
+                }
+                if (board.getPiece(rookPosition) != null && board.getPiece(rookPosition).getPieceType() == ChessPiece.PieceType.ROOK) {
+                    ChessPosition firstMovePosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + moveDistance / 2);
+                    ChessMove firstMove = new ChessMove(move.getStartPosition(), firstMovePosition, null);
+                    board.makeMove(firstMove);
+                    if (isInCheck(myPiece.getTeamColor())) {
+                        isInvalid = true;
+                    }
+                    board.makeMove(new ChessMove(firstMove.getEndPosition(), firstMove.getStartPosition(), null));
+                    ChessMove rookMove = new ChessMove(rookPosition, firstMovePosition, null);
+                    board.makeMove(move);
+                    board.makeMove(rookMove);
+                    if (isInCheck(myPiece.getTeamColor())) {
+                        isInvalid = true;
+                    }
+                    board.makeMove(new ChessMove(rookMove.getEndPosition(), rookMove.getStartPosition(), null));
+                    board.makeMove(new ChessMove(move.getEndPosition(), move.getStartPosition(), null));
+                }
+                else {
+                    isInvalid = true;
+                }
+                if (isInvalid) {
+                    invalidMoves.add(move);
+                }
             }
         }
         moves.removeAll(invalidMoves);

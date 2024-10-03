@@ -59,23 +59,36 @@ public class ChessGame {
 
         List<ChessMove> invalidMoves = new ArrayList<>();
         for (ChessMove move : moves) {
-            ChessPosition capturedPiecePosition = move.getEndPosition();
-            if(isEnPassant(move)) {
-                capturedPiecePosition = new ChessPosition(move.getStartPosition().getRow(), move.getEndPosition().getColumn());
-            }
-            ChessPiece capturedPiece = board.getPiece(capturedPiecePosition);
+            if (!isCastle(move)) {
+                ChessPosition capturedPiecePosition=move.getEndPosition();
+                if (isEnPassant(move)) {
+                    capturedPiecePosition=new ChessPosition(move.getStartPosition().getRow(), move.getEndPosition().getColumn());
+                }
+                ChessPiece capturedPiece=board.getPiece(capturedPiecePosition);
 
-            board.makeMove(move);
-            if (isInCheck(myPiece.getTeamColor())) {
-                invalidMoves.add(move);
+                board.makeMove(move);
+                if (isInCheck(myPiece.getTeamColor())) {
+                    invalidMoves.add(move);
+                }
+                board.makeMove(new ChessMove(move.getEndPosition(), move.getStartPosition(), null));
+                if (capturedPiece != null) {
+                    board.addPiece(capturedPiecePosition, capturedPiece);
+                }
             }
-            board.makeMove(new ChessMove(move.getEndPosition(), move.getStartPosition(), null));
-            if (capturedPiece != null) {
-                board.addPiece(capturedPiecePosition, capturedPiece);
+            else {
+                //move king and Rook
             }
         }
         moves.removeAll(invalidMoves);
         return moves;
+    }
+
+    private boolean isCastle(ChessMove move) {
+        if (board.getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.KING) {
+            int moveDistance = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+            return moveDistance == 2 || moveDistance == -2;
+        }
+        return false;
     }
 
     /**

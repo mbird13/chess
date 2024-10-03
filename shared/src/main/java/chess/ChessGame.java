@@ -76,7 +76,7 @@ public class ChessGame {
                 }
             }
             else {
-                boolean isInvalid = false;
+                boolean isInvalid = isInCheck(myPiece.getTeamColor());
                 //move king and Rook
                 int moveDistance = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
                 ChessPosition rookPosition = new ChessPosition(move.getStartPosition().getRow(), 8);
@@ -132,9 +132,24 @@ public class ChessGame {
             throw new InvalidMoveException("Invalid Move");
         }
         checkEnPassant(move);
+        checkCastle(move);
         board.makeMove(move);
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         resetEnemyEnPassant(teamTurn);
+    }
+
+    private void checkCastle(ChessMove move) {
+        if (isCastle(move)) {
+            int moveDistance = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+            ChessPosition rookPosition = new ChessPosition(move.getStartPosition().getRow(), 8);
+            if (moveDistance < 0) {
+                rookPosition = new ChessPosition(move.getStartPosition().getRow(), 1);
+            }
+            ChessPosition newRookPosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + moveDistance / 2);
+            ChessMove rookMove = new ChessMove(rookPosition, newRookPosition, null);
+
+            board.makeMove(rookMove);
+        }
     }
 
     private void resetEnemyEnPassant(TeamColor teamTurn) {

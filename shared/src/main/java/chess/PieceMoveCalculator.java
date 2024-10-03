@@ -113,6 +113,7 @@ class KingMoveCalculator extends PieceMoveCalculator {
     }
 
     //Castling
+    boolean test = isInStartPosition(myPosition,myColor);
     if ( isInStartPosition(myPosition, myColor)) {
       var left = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1);
       var right = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1);
@@ -133,7 +134,7 @@ class KingMoveCalculator extends PieceMoveCalculator {
     if (myColor == ChessGame.TeamColor.BLACK) {
       startPosition = new ChessPosition(8,5);
     }
-    return myPosition == startPosition;
+    return myPosition.equals(startPosition);
   }
 }
 

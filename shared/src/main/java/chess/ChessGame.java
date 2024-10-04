@@ -133,6 +133,7 @@ public class ChessGame {
         }
         checkEnPassant(move);
         checkCastle(move);
+        board.getPiece(move.getStartPosition()).setAlreadyMoved(true);
         board.makeMove(move);
         teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         resetEnemyEnPassant(teamTurn);

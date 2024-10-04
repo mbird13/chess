@@ -113,28 +113,68 @@ class KingMoveCalculator extends PieceMoveCalculator {
     }
 
     //Castling
-    boolean test = isInStartPosition(myPosition,myColor);
-    if ( isInStartPosition(myPosition, myColor)) {
-      var left = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1);
-      var right = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1);
-      var leftTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 2);
-      var rightTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 2);
-      if (isValidMoveNoCapture(board, left) && isValidMoveNoCapture(board, leftTwo)) {
-        moves.add(new ChessMove(myPosition, leftTwo, null));
-      }
+    if (checkRightCastle(board, myColor)) {
+      var right = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1);
+      var rightTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 2);
+
       if (isValidMoveNoCapture(board, right) && isValidMoveNoCapture(board, rightTwo)) {
         moves.add(new ChessMove(myPosition, rightTwo, null));
       }
     }
+    if (checkLeftCastle(board,myColor)) {
+      var left = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1);
+      var leftTwo = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 2);
+
+      if (isValidMoveNoCapture(board, left) && isValidMoveNoCapture(board, leftTwo)) {
+        moves.add(new ChessMove(myPosition, leftTwo, null));
+      }
+
+    }
     return moves;
   }
 
-  private boolean isInStartPosition(ChessPosition myPosition, ChessGame.TeamColor myColor) {
-    ChessPosition startPosition = new ChessPosition(1, 5);
-    if (myColor == ChessGame.TeamColor.BLACK) {
-      startPosition = new ChessPosition(8,5);
+  private boolean checkRightCastle(ChessBoard board, ChessGame.TeamColor myColor) {
+    boolean canCastle = true;
+    int row = myColor == ChessGame.TeamColor.WHITE ? 1 : 8;
+    ChessPosition kingPosition = new ChessPosition(row, 5);
+    ChessPosition rightRook = new ChessPosition(row, 8);
+    if (board.getPiece(kingPosition) == null || board.getPiece(rightRook) == null) {
+      return false;
     }
-    return myPosition.equals(startPosition);
+    ChessPosition checkNull = new ChessPosition(row, kingPosition.getColumn()+1);
+    while (!checkNull.equals(rightRook)) {
+      if (board.getPiece(checkNull) != null) {
+        canCastle = false;
+      }
+      checkNull = new ChessPosition(row, checkNull.getColumn() + 1);
+    }
+
+    if (board.getPiece(kingPosition).isAlreadyMoved() || board.getPiece(rightRook).isAlreadyMoved()) {
+      canCastle = false;
+    }
+    return canCastle;
+  }
+
+  private boolean checkLeftCastle(ChessBoard board, ChessGame.TeamColor myColor) {
+    boolean canCastle = true;
+    int row = myColor == ChessGame.TeamColor.WHITE ? 1 : 8;
+    ChessPosition kingPosition = new ChessPosition(row, 5);
+    ChessPosition leftRook = new ChessPosition(row, 1);
+    if (board.getPiece(kingPosition) == null || board.getPiece(leftRook) == null) {
+      return false;
+    }
+    ChessPosition checkNull = new ChessPosition(row, kingPosition.getColumn()-1);
+    while (!checkNull.equals(leftRook)) {
+      if (board.getPiece(checkNull) != null) {
+        canCastle = false;
+      }
+      checkNull = new ChessPosition(row, checkNull.getColumn() - 1);
+    }
+
+    if (board.getPiece(kingPosition).isAlreadyMoved() || board.getPiece(leftRook).isAlreadyMoved()) {
+      canCastle = false;
+    }
+    return canCastle;
   }
 }
 

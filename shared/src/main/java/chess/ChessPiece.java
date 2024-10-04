@@ -18,11 +18,21 @@ public class ChessPiece {
         return enPassantStatus;
     }
 
-    public void setEnPassantStatus(boolean enPassanteStatus) {
-        this.enPassantStatus=enPassanteStatus;
+    public void setEnPassantStatus(boolean enPassantStatus) {
+        this.enPassantStatus=enPassantStatus;
     }
 
     private boolean enPassantStatus= false;
+
+    public boolean isAlreadyMoved() {
+        return alreadyMoved;
+    }
+
+    public void setAlreadyMoved(boolean alreadyMoved) {
+        this.alreadyMoved=alreadyMoved;
+    }
+
+    private boolean alreadyMoved = false;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor=pieceColor;

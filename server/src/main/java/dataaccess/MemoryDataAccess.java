@@ -57,8 +57,8 @@ public class MemoryDataAccess implements DataAccess {
     return null;
   } //TODO: what is chess game string?
   //createAuth: Create a new authorization.
-  public AuthData createAuth(String username){
-    return null;
+  public void createAuth(AuthData authData){
+    this.authDataSet.add(authData);
   }
   //getAuth: Retrieve an authorization given an authToken.
   public AuthData getAuth(String authToken){

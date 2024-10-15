@@ -17,6 +17,47 @@ public class ServiceUnitTests {
     database.createUser("name", "password");
     database.createAuth("name");
 
-    Assertions.assertEquals(database, new MemoryDataAccess(), "Database not cleared properly");
+    //clear database
+    database.clear();
+
+    //database is equal to empty database
+    Assertions.assertEquals(new MemoryDataAccess(), database, "Database not cleared properly");
+  }
+
+  @Test
+  void createUser() {
+
+  }
+
+  @Test
+  void getUser() {
+  }
+
+  @Test
+  void createGame() {
+  }
+
+  @Test
+  void getGame() {
+  }
+
+  @Test
+  void listGames() {
+  }
+
+  @Test
+  void updateGame() {
+  }
+
+  @Test
+  void createAuth() {
+  }
+
+  @Test
+  void getAuth() {
+  }
+
+  @Test
+  void deleteAuthData() {
   }
 }

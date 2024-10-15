@@ -5,14 +5,18 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class MemoryDataAccess implements DataAccess {
   private Set<UserData> users;
   private Set<AuthData> authDataSet;
   private Set<GameData> games;
+
+  public MemoryDataAccess() {
+    users = new HashSet<>();
+    authDataSet = new HashSet<>();
+    games = new HashSet<>();
+  }
 
   //  clear: A method for clearing all data from the database. This is used during testing.
   public void clear() {
@@ -22,11 +26,19 @@ public class MemoryDataAccess implements DataAccess {
   }
   //createUser: Create a new user.
   public UserData createUser(String username, String password) {
-    return null;
+    UserData newUser = new UserData(username, password);
+    users.add(newUser);
+    return newUser;
   }
   //getUser: Retrieve a user with the given username.
   public UserData getUser(String username){
-    return null;
+    UserData user = null;
+    for (UserData userData: users) {
+      if (userData.username().equals(username)) {
+        user = userData;
+      }
+    }
+    return user;
   }
   //createGame: Create a new game.
   public GameData createGame(){

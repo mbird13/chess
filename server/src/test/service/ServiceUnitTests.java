@@ -1,9 +1,13 @@
 package service;
 
+import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import model.UserData;
+import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import Exception.ResponseException;
 
 public class ServiceUnitTests {
   @Test
@@ -24,8 +28,32 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void createUser() {
+  void loginSuccess() {
+    DataAccess database = new MemoryDataAccess();
+    UserService service = new UserService(database);
 
+    LoginRequest request = new LoginRequest("name", "password");
+    Assertions.assertDoesNotThrow(() -> service.register(request));
+    Assertions.assertDoesNotThrow(() -> service.login(request));
+
+    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+  }
+
+  @Test
+  void loginFailure() {
+    DataAccess database = new MemoryDataAccess();
+    UserService service = new UserService(database);
+
+    LoginRequest request = new LoginRequest("name", "password");
+    Assertions.assertDoesNotThrow(() -> service.register(request));
+    Assertions.assertDoesNotThrow(() -> service.login(request));
+    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+
+    //duplicate username request
+    LoginRequest duplicateRequest = new LoginRequest("name", "newPassword");
+    Assertions.assertThrows(ResponseException.class, () -> service.login(duplicateRequest));
+
+    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
   }
 
   @Test

@@ -42,7 +42,7 @@ public class UserService implements Service {
     return login(new LoginRequest(user.username(), user.password()));
   }
 
-  private LoginResult login(LoginRequest loginRequest) throws ResponseException {
+  public LoginResult login(LoginRequest loginRequest) throws ResponseException {
 
     UserData userData = database.getUser(loginRequest.username());
     if (userData == null || !Objects.equals(userData.password(), loginRequest.password())) {
@@ -60,8 +60,18 @@ public class UserService implements Service {
     return new LoginResult(userData.username(), token, null);
   }
 
+  public void logout(LogoutRequest logoutRequest) throws ResponseException {
+    AuthData authData = database.getAuth(logoutRequest.authToken());
+    if (authData == null) {
+      throw new ResponseException(401, "Error: unauthorized");
+    }
+
+    database.deleteAuthData(authData);
+  }
+
 }
 
 record LoginRequest(String username, String password) {}
 record LoginResult(String username, String authToken, String exceptionMessage) {}
+record LogoutRequest(String authToken) {}
 

@@ -65,7 +65,7 @@ public class MemoryDataAccess implements DataAccess {
     return null;
   }
   //deleteAuth: Delete an authorization so that it is no longer valid.
-  public void deleteAuthData(UserData user){}
+  public void deleteAuthData(AuthData authData){}
 
   @Override
   public boolean equals(Object o) {

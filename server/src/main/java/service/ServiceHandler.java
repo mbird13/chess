@@ -4,10 +4,12 @@ import dataaccess.DataAccess;
 
 public class ServiceHandler {
 
-  private LoginService loginService;
+  private UserService userService;
+  private GameService gameService;
 
   public ServiceHandler(DataAccess database) {
-    loginService = new LoginService(database);
+    userService= new UserService(database);
+    gameService = new GameService(database);
   }
 
 }

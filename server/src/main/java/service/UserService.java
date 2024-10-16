@@ -12,13 +12,13 @@ import java.util.Objects;
 /**
  * Implements services related to creating and logging in users
  */
-public class LoginService implements Service {
+public class UserService implements Service {
 
   private static final SecureRandom secureRandom = new SecureRandom();
   private static final int TOKEN_LENGTH = 24;
   private DataAccess database;
 
-  public LoginService(DataAccess database) {
+  public UserService(DataAccess database) {
     this.database = database;
   }
 

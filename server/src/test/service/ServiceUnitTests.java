@@ -1,7 +1,6 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
-import model.AuthData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,8 @@ public class ServiceUnitTests {
     //Add elements to database to be cleared
     MemoryDataAccess database = new MemoryDataAccess();
     ServiceHandler service = new ServiceHandler(database);
-    LoginService loginService = new LoginService(database);
-    Assertions.assertDoesNotThrow(() -> loginService.register(new LoginRequest("name", "password")));
+    UserService userService= new UserService(database);
+    Assertions.assertDoesNotThrow(() -> userService.register(new LoginRequest("name", "password")));
 
     //clear database
     database.clear();

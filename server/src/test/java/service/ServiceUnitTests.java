@@ -69,7 +69,7 @@ public class ServiceUnitTests {
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
 
-    Assertions.assertEquals(null, database.getAuth(loginResult.authToken()));
+    Assertions.assertNull(database.getAuth(loginResult.authToken()));
   }
 
   @Test
@@ -88,7 +88,7 @@ public class ServiceUnitTests {
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
 
-    Assertions.assertEquals(null, database.getAuth(loginResult.authToken()));
+    Assertions.assertNull(database.getAuth(loginResult.authToken()));
 
     //duplicate logout
     Assertions.assertThrows(ResponseException.class, () -> service.logout(logoutRequest));

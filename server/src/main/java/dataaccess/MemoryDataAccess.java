@@ -4,18 +4,19 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 
 import java.util.*;
 
 public class MemoryDataAccess implements DataAccess {
-  private Set<UserData> users;
-  private Set<AuthData> authDataSet;
-  private Set<GameData> games;
+  private HashMap<String, UserData> users;
+  private HashMap<String, AuthData> authDataSet;
+  private HashMap<String, GameData> games;
 
   public MemoryDataAccess() {
-    users = new HashSet<>();
-    authDataSet = new HashSet<>();
-    games = new HashSet<>();
+    users = new HashMap<>();
+    authDataSet = new HashMap<>();
+    games = new HashMap<>();
   }
 
   //  clear: A method for clearing all data from the database. This is used during testing.
@@ -27,18 +28,12 @@ public class MemoryDataAccess implements DataAccess {
   //createUser: Create a new user.
   public UserData createUser(String username, String password) {
     UserData newUser = new UserData(username, password);
-    users.add(newUser);
+    users.put(username, newUser);
     return newUser;
   }
   //getUser: Retrieve a user with the given username.
   public UserData getUser(String username){
-    UserData user = null;
-    for (UserData userData: users) {
-      if (userData.username().equals(username)) {
-        user = userData;
-      }
-    }
-    return user;
+    return users.get(username);
   }
   //createGame: Create a new game.
   public GameData createGame(){
@@ -58,21 +53,15 @@ public class MemoryDataAccess implements DataAccess {
   } //TODO: what is chess game string?
   //createAuth: Create a new authorization.
   public void createAuth(AuthData authData){
-    this.authDataSet.add(authData);
+    this.authDataSet.put(authData.authToken(), authData);
   }
   //getAuth: Retrieve an authorization given an authToken.
   public AuthData getAuth(String authToken){
-    AuthData auth = null;
-    for (AuthData authData: authDataSet) {
-      if (authData.authToken().equals(authToken)) {
-        auth = authData;
-      }
-    }
-    return auth;
+    return authDataSet.get(authToken);
   }
   //deleteAuth: Delete an authorization so that it is no longer valid.
   public void deleteAuthData(AuthData authData) {
-    authDataSet.remove(authData);
+    authDataSet.remove(authData.authToken());
   }
 
   @Override

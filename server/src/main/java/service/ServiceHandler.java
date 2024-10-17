@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
 
 public class ServiceHandler {
 
@@ -11,5 +12,13 @@ public class ServiceHandler {
     userService= new UserService(database);
     gameService = new GameService(database);
   }
+
+  public ServiceHandler() {
+    DataAccess database = new MemoryDataAccess();
+    userService = new UserService(database);
+    gameService = new GameService(database);
+  }
+
+
 
 }

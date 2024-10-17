@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import model.AuthData;
 import model.UserData;
 import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.Assertions;
@@ -55,6 +56,44 @@ public class ServiceUnitTests {
 
     Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
   }
+
+  @Test
+  void logoutSuccess() {
+    DataAccess database = new MemoryDataAccess();
+    UserService service = new UserService(database);
+
+    LoginRequest request = new LoginRequest("name", "password");
+    LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
+    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+
+    LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
+    Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
+
+    Assertions.assertEquals(null, database.getAuth(loginResult.authToken()));
+  }
+
+  @Test
+  void logoutFailure() {
+    DataAccess database = new MemoryDataAccess();
+    UserService service = new UserService(database);
+
+    //random authToken
+    LogoutRequest randomLogoutRequest = new LogoutRequest("randomstring");
+    //Assertions.assertThrows(ResponseException.class, () -> service.logout(randomLogoutRequest));
+
+    LoginRequest request = new LoginRequest("name", "password");
+    LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
+    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+
+    LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
+    Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
+
+    Assertions.assertEquals(null, database.getAuth(loginResult.authToken()));
+
+    //duplicate logout
+    Assertions.assertThrows(ResponseException.class, () -> service.logout(logoutRequest));
+  }
+
 
   @Test
   void getUser() {

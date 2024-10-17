@@ -62,10 +62,18 @@ public class MemoryDataAccess implements DataAccess {
   }
   //getAuth: Retrieve an authorization given an authToken.
   public AuthData getAuth(String authToken){
-    return null;
+    AuthData auth = null;
+    for (AuthData authData: authDataSet) {
+      if (authData.authToken().equals(authToken)) {
+        auth = authData;
+      }
+    }
+    return auth;
   }
   //deleteAuth: Delete an authorization so that it is no longer valid.
-  public void deleteAuthData(AuthData authData){}
+  public void deleteAuthData(AuthData authData) {
+    authDataSet.remove(authData);
+  }
 
   @Override
   public boolean equals(Object o) {

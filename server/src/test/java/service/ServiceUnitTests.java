@@ -19,7 +19,7 @@ public class ServiceUnitTests {
     MemoryDataAccess database = new MemoryDataAccess();
     ServiceHandler service = new ServiceHandler(database);
     UserService userService= new UserService(database);
-    Assertions.assertDoesNotThrow(() -> userService.register(new LoginRequest("name", "password")));
+    Assertions.assertDoesNotThrow(() -> userService.register(new RegisterRequest("name", "password", "email")));
 
     //clear database
     database.clear();
@@ -33,11 +33,12 @@ public class ServiceUnitTests {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
-    LoginRequest request = new LoginRequest("name", "password");
+    var request = new RegisterRequest("name", "password", "email");
     Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertDoesNotThrow(() -> service.login(request));
+    var loginRequest = new LoginRequest("name", "password");
+    Assertions.assertDoesNotThrow(() -> service.login(loginRequest));
 
-    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
   }
 
   @Test
@@ -45,16 +46,17 @@ public class ServiceUnitTests {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
-    LoginRequest request = new LoginRequest("name", "password");
+    var request = new RegisterRequest("name", "password", "email");
     Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertDoesNotThrow(() -> service.login(request));
-    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+    var loginRequest = new LoginRequest("name", "password");
+    Assertions.assertDoesNotThrow(() -> service.login(loginRequest));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
 
     //duplicate username request
     LoginRequest duplicateRequest = new LoginRequest("name", "newPassword");
     Assertions.assertThrows(ResponseException.class, () -> service.login(duplicateRequest));
 
-    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
   }
 
   @Test
@@ -62,9 +64,9 @@ public class ServiceUnitTests {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
-    LoginRequest request = new LoginRequest("name", "password");
+    var request = new RegisterRequest("name", "password", "email");
     LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
 
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
@@ -81,9 +83,9 @@ public class ServiceUnitTests {
     LogoutRequest randomLogoutRequest = new LogoutRequest("randomstring");
     //Assertions.assertThrows(ResponseException.class, () -> service.logout(randomLogoutRequest));
 
-    LoginRequest request = new LoginRequest("name", "password");
+    var request = new RegisterRequest("name", "password", "email");
     LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertEquals(new UserData("name", "password"), database.getUser("name"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
 
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));

@@ -28,12 +28,23 @@ public class ServiceHandler {
   }
 
   public Object register(Request request) throws ResponseException {
-    var user = new Gson().fromJson(request.body(), LoginRequest.class);
-    LoginResult loginResult = userService.register(user);
-    return new Gson().toJson(loginResult);
+    var user = new Gson().fromJson(request.body(), RegisterRequest.class);
+    LoginResult result = userService.register(user);
+    return new Gson().toJson(result);
   }
 
   public void clear() {
     database.clear();
+  }
+
+  public Object login(Request request) throws ResponseException {
+    var user = new Gson().fromJson(request.body(), LoginRequest.class);
+    LoginResult result = userService.login(user);
+    return new Gson().toJson(result);
+  }
+
+  public void logout(Request request) throws ResponseException {
+    LogoutRequest logoutRequest = new LogoutRequest(request.headers("authorization"));
+    userService.logout(logoutRequest);
   }
 }

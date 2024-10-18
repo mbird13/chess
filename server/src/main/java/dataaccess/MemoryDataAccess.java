@@ -1,10 +1,8 @@
 package dataaccess;
 
-import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 
 import java.util.*;
 
@@ -26,8 +24,8 @@ public class MemoryDataAccess implements DataAccess {
     games.clear();
   }
   //createUser: Create a new user.
-  public UserData createUser(String username, String password) {
-    UserData newUser = new UserData(username, password);
+  public UserData createUser(String username, String password, String email) {
+    UserData newUser = new UserData(username, password, email);
     users.put(username, newUser);
     return newUser;
   }

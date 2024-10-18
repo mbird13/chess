@@ -30,14 +30,17 @@ public class UserService implements Service {
    * @return RegisterResult contains UserData of new user
    * @throws ResponseException username already taken
    */
-  public LoginResult register(LoginRequest request) throws ResponseException {
+  public LoginResult register(RegisterRequest request) throws ResponseException {
+    if (request.username() == null || request.password() == null) {
+      throw new ResponseException(400, "Error: bad request");
+    }
 
     UserData user = database.getUser(request.username());
     if (user != null) {
       throw new ResponseException(403, "Error: already taken");
     }
 
-    user = database.createUser(request.username(), request.password());
+    user = database.createUser(request.username(), request.password(), request.email());
 
     return login(new LoginRequest(user.username(), user.password()));
   }
@@ -71,6 +74,7 @@ public class UserService implements Service {
 
 }
 
+record RegisterRequest(String username, String password, String email) {}
 record LoginRequest(String username, String password) {}
 record LoginResult(String username, String authToken, String exceptionMessage) {}
 record LogoutRequest(String authToken) {}

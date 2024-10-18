@@ -11,7 +11,7 @@ public interface DataAccess {
 //  clear: A method for clearing all data from the database. This is used during testing.
   void clear();
 //createUser: Create a new user.
-  UserData createUser(String username, String password);
+  UserData createUser(String username, String password, String email);
 //getUser: Retrieve a user with the given username.
   UserData getUser(String username);
 //createGame: Create a new game.

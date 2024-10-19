@@ -6,6 +6,7 @@ import model.AuthData;
 import Exception.ResponseException;
 import model.GameData;
 
+import java.util.Collection;
 import java.util.Objects;
 
 public class GameService implements Service {
@@ -30,6 +31,9 @@ public class GameService implements Service {
     AuthData user = database.getAuth(joinGameRequest.authToken());
 
     GameData oldGameData = database.getGame(joinGameRequest.gameID());
+    if (oldGameData == null) {
+      throw new ResponseException(400, "Error: bad request");
+    }
     GameData newGameData;
     if (Objects.equals(joinGameRequest.playerColor(), ChessGame.TeamColor.BLACK)) {
       if (oldGameData.blackUsername() != null) {
@@ -56,9 +60,16 @@ public class GameService implements Service {
       throw new ResponseException(401, "Error: unauthorized");
     }
   }
+
+  public Collection<GameData> listGames(ListGamesRequest listGamesRequest) throws ResponseException {
+    verifyAuthToken(listGamesRequest.authToken());
+    return database.listGames();
+  }
 }
 
 record CreateGameRequest(String authToken, String gameName) {}
-record CreateGameResponse(String gameID){}
-record JoinGameRequest(String authToken, ChessGame.TeamColor playerColor, String gameID){}
+record CreateGameResponse(String gameID) {}
+record JoinGameRequest(String authToken, ChessGame.TeamColor playerColor, String gameID) {}
+record ListGamesRequest(String authToken) {}
+record ListGamesResponse(Collection<GameData> games) {}
 

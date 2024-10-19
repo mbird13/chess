@@ -3,12 +3,15 @@ package service;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import model.GameData;
 import model.UserData;
 import spark.Request;
 import Exception.ResponseException;
 
 import javax.security.auth.login.CredentialException;
 import javax.xml.crypto.Data;
+import java.util.Collection;
+import java.util.List;
 
 public class ServiceHandler {
 
@@ -50,17 +53,23 @@ public class ServiceHandler {
   }
 
   public Object createGame(Request request) throws ResponseException {
-    String auth = new Gson().fromJson(request.headers("authorization"), String.class);
     CreateGameRequest tempGameRequest = new Gson().fromJson(request.body(), CreateGameRequest.class);
-    CreateGameRequest gameRequest = new CreateGameRequest(auth, tempGameRequest.gameName());
+    CreateGameRequest gameRequest = new CreateGameRequest(request.headers("authorization"), tempGameRequest.gameName());
     CreateGameResponse gameResponse = gameService.createGame(gameRequest);
     return new Gson().toJson(gameResponse);
   }
 
   public void joinGame(Request request) throws ResponseException {
-    String auth = new Gson().fromJson(request.headers("authorization"), String.class);
     JoinGameRequest tempRequest = new Gson().fromJson(request.body(), JoinGameRequest.class);
-    JoinGameRequest joinGameRequest = new JoinGameRequest(auth, tempRequest.playerColor(), tempRequest.gameID());
+    JoinGameRequest joinGameRequest = new JoinGameRequest(request.headers("authorization"), tempRequest.playerColor(), tempRequest.gameID());
     gameService.joinGame(joinGameRequest);
   }
+
+  public Object listGames(Request request) throws ResponseException {
+    ListGamesRequest listGamesRequest = new ListGamesRequest(request.headers("authorization"));
+    Collection<GameData> games = gameService.listGames(listGamesRequest);
+    var wrapper = new GameListWrapper(games);
+    return new Gson().toJson(wrapper);
+  }
 }
+

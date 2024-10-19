@@ -4,6 +4,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface DataAccess {
@@ -17,11 +18,11 @@ public interface DataAccess {
 //createGame: Create a new game.
   GameData createGame(String gameName);
 //getGame: Retrieve a specified game with the given game ID.
-  GameData getGame(int gameID);
+  GameData getGame(String gameID);
 //listGames: Retrieve all games.
-  List<GameData> listGames();
+  Collection<GameData> listGames();
 //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID. This is used when players join a game or when a move is made.
-  GameData updateGame(int gameID); //TODO: what is chess game string?
+  GameData updateGame(String gameID, GameData newGameData);
 //createAuth: Create a new authorization.
   void createAuth(AuthData authData);
 //getAuth: Retrieve an authorization given an authToken.

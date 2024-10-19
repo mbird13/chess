@@ -56,4 +56,11 @@ public class ServiceHandler {
     CreateGameResponse gameResponse = gameService.createGame(gameRequest);
     return new Gson().toJson(gameResponse);
   }
+
+  public void joinGame(Request request) throws ResponseException {
+    String auth = new Gson().fromJson(request.headers("authorization"), String.class);
+    JoinGameRequest tempRequest = new Gson().fromJson(request.body(), JoinGameRequest.class);
+    JoinGameRequest joinGameRequest = new JoinGameRequest(auth, tempRequest.playerColor(), tempRequest.gameID());
+    gameService.joinGame(joinGameRequest);
+  }
 }

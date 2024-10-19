@@ -44,17 +44,21 @@ public class MemoryDataAccess implements DataAccess {
   }
 
   //getGame: Retrieve a specified game with the given game ID.
-  public GameData getGame(int gameID){
-    return null;
+  public GameData getGame(String gameID){
+    return games.get(gameID);
   }
+
   //listGames: Retrieve all games.
-  public List<GameData> listGames(){
-    return null;
+  public Collection<GameData> listGames(){
+    return games.values();
   }
+
   //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID. This is used when players join a game or when a move is made.
-  public GameData updateGame(int gameID){
-    return null;
-  } //TODO: what is chess game string?
+  public GameData updateGame(String gameID, GameData newGame){ //TODO: Make Void
+    games.put(gameID, newGame);
+    return newGame;
+  }
+
   //createAuth: Create a new authorization.
   public void createAuth(AuthData authData){
     this.authDataSet.put(authData.authToken(), authData);

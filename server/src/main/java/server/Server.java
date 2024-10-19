@@ -23,6 +23,7 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
+        Spark.post("/game", this::createGame);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -31,6 +32,12 @@ public class Server {
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private Object createGame(Request request, Response response) throws ResponseException {
+        Object gameResponse = chessService.createGame(request);
+        response.status(200);
+        return gameResponse;
     }
 
     private Object logout(Request request, Response response) throws ResponseException {

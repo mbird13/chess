@@ -16,7 +16,7 @@ public class UserService implements Service {
 
   private static final SecureRandom secureRandom = new SecureRandom();
   private static final int TOKEN_LENGTH = 24;
-  private DataAccess database;
+  private final DataAccess database;
 
   public UserService(DataAccess database) {
     this.database = database;

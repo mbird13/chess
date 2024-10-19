@@ -15,7 +15,7 @@ public interface DataAccess {
 //getUser: Retrieve a user with the given username.
   UserData getUser(String username);
 //createGame: Create a new game.
-  GameData createGame();
+  GameData createGame(String gameName);
 //getGame: Retrieve a specified game with the given game ID.
   GameData getGame(int gameID);
 //listGames: Retrieve all games.

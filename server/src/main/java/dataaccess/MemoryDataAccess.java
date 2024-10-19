@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -33,10 +34,15 @@ public class MemoryDataAccess implements DataAccess {
   public UserData getUser(String username){
     return users.get(username);
   }
+
   //createGame: Create a new game.
-  public GameData createGame(){
-    return null;
+  public GameData createGame(String gameName){
+    String gameID = Integer.toString(games.size()+1);
+    var gameData = new GameData(gameID, null, null, gameName, new ChessGame());
+    games.put(gameID, gameData);
+    return gameData;
   }
+
   //getGame: Retrieve a specified game with the given game ID.
   public GameData getGame(int gameID){
     return null;

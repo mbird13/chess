@@ -7,6 +7,7 @@ import model.UserData;
 import spark.Request;
 import Exception.ResponseException;
 
+import javax.security.auth.login.CredentialException;
 import javax.xml.crypto.Data;
 
 public class ServiceHandler {
@@ -46,5 +47,13 @@ public class ServiceHandler {
   public void logout(Request request) throws ResponseException {
     LogoutRequest logoutRequest = new LogoutRequest(request.headers("authorization"));
     userService.logout(logoutRequest);
+  }
+
+  public Object createGame(Request request) throws ResponseException {
+    String auth = new Gson().fromJson(request.headers("authorization"), String.class);
+    CreateGameRequest tempGameRequest = new Gson().fromJson(request.body(), CreateGameRequest.class);
+    CreateGameRequest gameRequest = new CreateGameRequest(auth, tempGameRequest.gameName());
+    CreateGameResponse gameResponse = gameService.createGame(gameRequest);
+    return new Gson().toJson(gameResponse);
   }
 }

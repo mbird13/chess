@@ -66,8 +66,8 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ChessBoard that=(ChessBoard) o;
         return Arrays.deepEquals(squares, that.squares);
     }
@@ -86,7 +86,7 @@ public class ChessBoard {
                 if (square != null) {
                     r.append(square.toString());
                 }
-                else r.append(" ");
+                else { r.append(" "); }
             }
             r.append("\n");
         }

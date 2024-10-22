@@ -2,7 +2,7 @@ package server;
 
 import service.ServiceHandler;
 import spark.*;
-import Exception.ResponseException;
+import exception.ResponseException;
 
 
 public class Server {
@@ -80,7 +80,7 @@ public class Server {
     }
 
     private void exceptionHandler(ResponseException exception, Request request, Response response) {
-        response.status(exception.StatusCode());
+        response.status(exception.statusCode());
         response.body(String.format("{ \"message\": \"%s\" }", exception.getMessage()));
     }
 

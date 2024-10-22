@@ -3,18 +3,13 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import Exception.ResponseException;
-import passoff.model.TestAuthResult;
-
-import java.util.HashMap;
+import exception.ResponseException;
 
 public class ServiceUnitTests {
 

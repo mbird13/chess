@@ -39,8 +39,8 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ChessGame chessGame=(ChessGame) o;
         return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
     }
@@ -98,7 +98,8 @@ public class ChessGame {
                     rookPosition = new ChessPosition(move.getStartPosition().getRow(), 1);
                 }
                 if (board.getPiece(rookPosition) != null && board.getPiece(rookPosition).getPieceType() == ChessPiece.PieceType.ROOK) {
-                    ChessPosition firstMovePosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + moveDistance / 2);
+                    ChessPosition firstMovePosition = new ChessPosition(move.getStartPosition().getRow(),
+                            move.getStartPosition().getColumn() + moveDistance / 2);
                     ChessMove firstMove = new ChessMove(move.getStartPosition(), firstMovePosition, null);
                     board.makeMove(firstMove);
                     if (isInCheck(myPiece.getTeamColor())) {
@@ -160,7 +161,8 @@ public class ChessGame {
             if (moveDistance < 0) {
                 rookPosition = new ChessPosition(move.getStartPosition().getRow(), 1);
             }
-            ChessPosition newRookPosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn() + moveDistance / 2);
+            ChessPosition newRookPosition = new ChessPosition(move.getStartPosition().getRow(),
+                    move.getStartPosition().getColumn() + moveDistance / 2);
             ChessMove rookMove = new ChessMove(rookPosition, newRookPosition, null);
 
             board.makeMove(rookMove);

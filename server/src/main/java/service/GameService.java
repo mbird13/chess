@@ -3,7 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.AuthData;
-import Exception.ResponseException;
+import exception.ResponseException;
 import model.GameData;
 
 import java.util.Collection;

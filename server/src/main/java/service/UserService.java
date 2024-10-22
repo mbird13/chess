@@ -4,7 +4,7 @@ package service;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
-import Exception.ResponseException;
+import exception.ResponseException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
@@ -14,7 +14,7 @@ import java.util.Objects;
  */
 public class UserService implements Service {
 
-  private static final SecureRandom secureRandom = new SecureRandom();
+  private static final SecureRandom SECURE_RANDOM= new SecureRandom();
   private static final int TOKEN_LENGTH = 24;
   private final DataAccess database;
 
@@ -54,7 +54,7 @@ public class UserService implements Service {
 
     //create new authToken
     byte[] randomBytes = new byte[TOKEN_LENGTH];
-    secureRandom.nextBytes(randomBytes);
+    SECURE_RANDOM.nextBytes(randomBytes);
     String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
 
     AuthData authData = new AuthData(token, userData.username());

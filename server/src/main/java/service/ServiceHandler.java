@@ -4,14 +4,10 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import model.GameData;
-import model.UserData;
 import spark.Request;
-import Exception.ResponseException;
+import exception.ResponseException;
 
-import javax.security.auth.login.CredentialException;
-import javax.xml.crypto.Data;
 import java.util.Collection;
-import java.util.List;
 
 public class ServiceHandler {
 

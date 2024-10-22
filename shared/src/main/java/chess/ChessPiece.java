@@ -103,8 +103,8 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ChessPiece that=(ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -139,7 +139,7 @@ public class ChessPiece {
         else if (type == PieceType.BISHOP) {
             r.append("b");
         }
-        else return "not valid piece type";
+        else { return "not valid piece type"; }
         return r.toString();
     }
 }

@@ -53,8 +53,9 @@ public class MemoryDataAccess implements DataAccess {
     return games.values();
   }
 
-  //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID. This is used when players join a game or when a move is made.
-  public GameData updateGame(String gameID, GameData newGame){ //TODO: Make Void
+  //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID.
+  // This is used when players join a game or when a move is made.
+  public GameData updateGame(String gameID, GameData newGame){
     games.put(gameID, newGame);
     return newGame;
   }
@@ -74,8 +75,8 @@ public class MemoryDataAccess implements DataAccess {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) { return true; }
+    if (o == null || getClass() != o.getClass()) { return false; }
     MemoryDataAccess that=(MemoryDataAccess) o;
     return Objects.equals(users, that.users) && Objects.equals(authDataSet, that.authDataSet) && Objects.equals(games, that.games);
   }

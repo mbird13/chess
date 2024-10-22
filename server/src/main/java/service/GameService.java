@@ -71,5 +71,4 @@ record CreateGameRequest(String authToken, String gameName) {}
 record CreateGameResponse(String gameID) {}
 record JoinGameRequest(String authToken, ChessGame.TeamColor playerColor, String gameID) {}
 record ListGamesRequest(String authToken) {}
-record ListGamesResponse(Collection<GameData> games) {}
 

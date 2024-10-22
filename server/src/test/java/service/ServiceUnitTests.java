@@ -158,7 +158,7 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void joinGameFail() throws ResponseException {
+  void joinGameBadAuth() throws ResponseException {
     //initialize two users and create game
     DataAccess database = new MemoryDataAccess();
     UserService userService = new UserService(database);
@@ -173,10 +173,38 @@ public class ServiceUnitTests {
     //bad authToken
     JoinGameRequest badRequest = new JoinGameRequest("badAuth", ChessGame.TeamColor.WHITE, "1");
     Assertions.assertThrows(ResponseException.class, () -> gameService.joinGame(badRequest));
+  }
+
+  @Test
+  void joinGameBadID() throws ResponseException {
+    //initialize two users and create game
+    DataAccess database = new MemoryDataAccess();
+    UserService userService = new UserService(database);
+    var registerRequest = new RegisterRequest("name", "password", "email");
+    var registerResult = userService.register(registerRequest);
+    var playerTwoRequest = new RegisterRequest("playerTwo", "pass", "@321");
+    var playerTwoResult = userService.register(playerTwoRequest);
+    var createRequest = new CreateGameRequest(registerResult.authToken(), "gameName");
+    GameService gameService = new GameService(database);
+    Assertions.assertDoesNotThrow(() -> gameService.createGame(createRequest));
 
     //bad gameID
     var badGameID = new JoinGameRequest(registerResult.authToken(), ChessGame.TeamColor.WHITE, "5");
     Assertions.assertThrows(ResponseException.class, () -> gameService.joinGame(badGameID));
+  }
+
+  @Test
+  void joinGameDuplicatePlayer() throws ResponseException {
+    //initialize two users and create game
+    DataAccess database = new MemoryDataAccess();
+    UserService userService = new UserService(database);
+    var registerRequest = new RegisterRequest("name", "password", "email");
+    var registerResult = userService.register(registerRequest);
+    var playerTwoRequest = new RegisterRequest("playerTwo", "pass", "@321");
+    var playerTwoResult = userService.register(playerTwoRequest);
+    var createRequest = new CreateGameRequest(registerResult.authToken(), "gameName");
+    GameService gameService = new GameService(database);
+    Assertions.assertDoesNotThrow(() -> gameService.createGame(createRequest));
 
     //add two white players
     JoinGameRequest request = new JoinGameRequest(registerResult.authToken(), ChessGame.TeamColor.WHITE, "1");

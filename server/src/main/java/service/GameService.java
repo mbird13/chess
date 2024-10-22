@@ -5,6 +5,10 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import exception.ResponseException;
 import model.GameData;
+import servicehelpers.CreateGameRequest;
+import servicehelpers.CreateGameResponse;
+import servicehelpers.JoinGameRequest;
+import servicehelpers.ListGamesRequest;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -66,9 +70,4 @@ public class GameService implements Service {
     return database.listGames();
   }
 }
-
-record CreateGameRequest(String authToken, String gameName) {}
-record CreateGameResponse(String gameID) {}
-record JoinGameRequest(String authToken, ChessGame.TeamColor playerColor, String gameID) {}
-record ListGamesRequest(String authToken) {}
 

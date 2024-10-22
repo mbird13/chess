@@ -1,6 +1,6 @@
 package server;
 
-import service.ServiceHandler;
+import servicehelpers.ServiceHandler;
 import spark.*;
 import exception.ResponseException;
 

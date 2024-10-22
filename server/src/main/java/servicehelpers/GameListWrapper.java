@@ -1,4 +1,4 @@
-package service;
+package servicehelpers;
 
 import model.GameData;
 

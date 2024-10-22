@@ -1,9 +1,10 @@
-package service;
+package servicehelpers;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import model.GameData;
+import service.*;
 import spark.Request;
 import exception.ResponseException;
 

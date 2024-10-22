@@ -5,6 +5,11 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
 import exception.ResponseException;
+import servicehelpers.LoginRequest;
+import servicehelpers.LoginResult;
+import servicehelpers.LogoutRequest;
+import servicehelpers.RegisterRequest;
+
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
@@ -73,9 +78,4 @@ public class UserService implements Service {
   }
 
 }
-
-record RegisterRequest(String username, String password, String email) {}
-record LoginRequest(String username, String password) {}
-record LoginResult(String username, String authToken, String exceptionMessage) {}
-record LogoutRequest(String authToken) {}
 

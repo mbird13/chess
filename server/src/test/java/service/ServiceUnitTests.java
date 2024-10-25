@@ -25,7 +25,6 @@ public class ServiceUnitTests {
   public void clear() {
     //Add elements to database to be cleared
     MemoryDataAccess database = new MemoryDataAccess();
-    ServiceHandler service = new ServiceHandler(database);
     UserService userService= new UserService(database);
     Assertions.assertDoesNotThrow(() -> userService.register(new RegisterRequest("name", "password", "email")));
 
@@ -89,7 +88,7 @@ public class ServiceUnitTests {
 
     //random authToken
     LogoutRequest randomLogoutRequest = new LogoutRequest("randomstring");
-    //Assertions.assertThrows(ResponseException.class, () -> service.logout(randomLogoutRequest));
+    Assertions.assertThrows(ResponseException.class, () -> service.logout(randomLogoutRequest));
 
     var request = new RegisterRequest("name", "password", "email");
     LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));

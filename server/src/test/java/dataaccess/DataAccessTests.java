@@ -43,13 +43,19 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void createUser(DataAccess database) {
-
+    Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
+    Assertions.assertEquals(new UserData("2", "2", "@"), database.getUser("2"));
   }
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void getUser(DataAccess database) {
-
+    Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
+    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
+    Assertions.assertEquals(new UserData("2", "2", "@"), database.getUser("2"));
   }
 
   @ParameterizedTest

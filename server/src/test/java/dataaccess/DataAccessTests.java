@@ -88,8 +88,33 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void listGames(DataAccess database) {
+    void getManyGames(DataAccess database) {
+    for (int i = 1; i < 20; i++) {
+      int finalI=i;
+      Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
+    }
 
+    for (int i = 1; i < 20; i++) {
+      var game = database.getGame(String.valueOf(i));
+      Assertions.assertEquals(String.valueOf(i), game.gameName());
+      Assertions.assertEquals(new ChessGame(), game.game());
+      Assertions.assertNull(game.blackUsername());
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("DataAccessImplementations")
+  void listGames(DataAccess database) {
+    var test = database.listGames();
+    database.createGame("name");
+  }
+
+  @ParameterizedTest
+  @MethodSource("DataAccessImplementations")
+  void listNoGames(DataAccess database) {
+    database.clear();
+    var games = Assertions.assertDoesNotThrow(database::listGames);
+    Assertions.assertEquals(0, games.size());
   }
 
   @ParameterizedTest

@@ -1,6 +1,9 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -129,8 +132,26 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void updateGame(DataAccess database) {
+  void updateGame(DataAccess database) throws InvalidMoveException {
+    for (int i = 1; i <= 200; i++) {
+      int finalI=i;
+      Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
+    }
 
+    var game20 = database.getGame("20");
+    var expected = new GameData("20", null, null, "20", new ChessGame());
+    Assertions.assertEquals(expected, game20);
+
+    var updatedChessGame = new ChessGame();
+    updatedChessGame.makeMove(new ChessMove(new ChessPosition(2,3), new ChessPosition(3, 3), null));
+    var newGameData = new GameData("20", "white", "black", "20", updatedChessGame);
+    database.updateGame("20", newGameData);
+
+    var newRetrievedGame = database.getGame("20");
+    Assertions.assertEquals(newGameData, newRetrievedGame);
+
+    Assertions.assertDoesNotThrow(() ->
+            newRetrievedGame.game().makeMove(new ChessMove(new ChessPosition(7,3), new ChessPosition(6, 3), null)));
   }
 
   @ParameterizedTest

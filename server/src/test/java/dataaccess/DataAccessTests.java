@@ -105,8 +105,18 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void listGames(DataAccess database) {
-    var test = database.listGames();
-    database.createGame("name");
+    for (int i = 1; i <= 200; i++) {
+      int finalI=i;
+      Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
+    }
+
+    var games = Assertions.assertDoesNotThrow(database::listGames);
+    Assertions.assertEquals(200, games.size());
+
+    for (int i = 1; i <= 200; i++) {
+      var game = new GameData(Integer.toString(i), null, null, Integer.toString(i), new ChessGame());
+      Assertions.assertTrue(games.contains(game));
+    }
   }
 
   @ParameterizedTest

@@ -184,8 +184,12 @@ public class SqlDataAccess implements DataAccess {
   }
 
   @Override
-  public GameData updateGame(String gameID, GameData newGameData) {
-    return null;
+  public GameData updateGame(String gameID, GameData newGameData) throws ResponseException {
+    var statement = "UPDATE game SET name = ?, white_username = ?, black_username = ?, game = ? WHERE id = ?";
+    var gameJson = new Gson().toJson(newGameData.game(), ChessGame.class);
+
+    executeUpdate(statement, newGameData.gameName(), newGameData.whiteUsername(), newGameData.blackUsername(), gameJson, gameID);
+    return newGameData;
   }
 
   @Override

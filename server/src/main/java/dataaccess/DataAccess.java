@@ -25,7 +25,7 @@ public interface DataAccess {
   Collection<GameData> listGames() throws ResponseException;
 //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID.
 // This is used when players join a game or when a move is made.
-  GameData updateGame(String gameID, GameData newGameData);
+  GameData updateGame(String gameID, GameData newGameData) throws ResponseException;
 //createAuth: Create a new authorization.
   void createAuth(AuthData authData);
 //getAuth: Retrieve an authorization given an authToken.

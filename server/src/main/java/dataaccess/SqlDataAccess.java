@@ -83,8 +83,11 @@ public class SqlDataAccess implements DataAccess {
   }
 
   @Override
-  public UserData createUser(String username, String password, String email) {
-    return null;
+  public UserData createUser(String username, String password, String email) throws ResponseException {
+    var statement = "INSERT INTO user (username, password, email)\n" +
+            "VALUES (?, ?, ?);";
+    executeStatement(statement, username, password, email);
+    return new UserData(username, password, email);
   }
 
   @Override

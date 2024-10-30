@@ -30,7 +30,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void clear(DataAccess database) {
+  void clear(DataAccess database) throws ResponseException {
     database.createUser("name", "password", "email");
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     database.createUser("2", "2", "@");

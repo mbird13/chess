@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -10,7 +11,7 @@ import java.util.List;
 public interface DataAccess {
 
 //  clear: A method for clearing all data from the database. This is used during testing.
-  void clear();
+  void clear() throws ResponseException;
 //createUser: Create a new user.
   UserData createUser(String username, String password, String email);
 //getUser: Retrieve a user with the given username.

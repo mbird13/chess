@@ -74,7 +74,7 @@ public class Server {
         return loginResponse;
     }
 
-    private Object clear(Request request, Response response) {
+    private Object clear(Request request, Response response) throws ResponseException {
         chessService.clear();
         response.status(200);
         return "";

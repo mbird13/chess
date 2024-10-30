@@ -39,7 +39,7 @@ public class ServiceHandler {
     return new Gson().toJson(result);
   }
 
-  public void clear() {
+  public void clear() throws ResponseException {
     database.clear();
   }
 

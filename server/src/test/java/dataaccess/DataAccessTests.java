@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -20,9 +21,10 @@ import java.util.stream.Stream;
 
 public class DataAccessTests {
 
-  public static Stream<Arguments> DataAccessImplementations() {
+  public static Stream<Arguments> DataAccessImplementations() throws ResponseException, DataAccessException {
     return Stream.of(
-            Arguments.of(new MemoryDataAccess())
+            Arguments.of(new MemoryDataAccess()),
+            Arguments.of(new SqlDataAccess())
     );
   }
 
@@ -124,7 +126,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void listNoGames(DataAccess database) {
+  void listNoGames(DataAccess database) throws ResponseException {
     database.clear();
     var games = Assertions.assertDoesNotThrow(database::listGames);
     Assertions.assertEquals(0, games.size());

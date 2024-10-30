@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -7,7 +8,10 @@ import model.UserData;
 
 import java.lang.module.ResolutionException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+
+import static java.sql.Types.NULL;
 
 public class SqlDataAccess implements DataAccess {
 
@@ -55,9 +59,27 @@ public class SqlDataAccess implements DataAccess {
 
   }
 
-  @Override
-  public void clear() {
+  private void executeStatement(String statement, Object... params) throws ResponseException {
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+        for (var i = 0; i < params.length; i++) {
+          var param = params[i];
+          if (param instanceof String p) preparedStatement.setString(i + 1, p);
+          else if (param instanceof Integer p) preparedStatement.setInt(i + 1, p);
+          else if (param instanceof ChessGame p) preparedStatement.setString(i + 1, p.toString());
+          else if (param == null) preparedStatement.setNull(i + 1, NULL);
+        }
+        preparedStatement.executeUpdate();
+      }
+    } catch (DataAccessException | SQLException e) {
+      throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+    }
+  }
 
+  @Override
+  public void clear() throws ResponseException {
+    var statement = "DROP DATABASE IF EXISTS chess;";
+    executeStatement(statement);
   }
 
   @Override

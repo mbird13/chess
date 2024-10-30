@@ -36,7 +36,7 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void loginSuccess() {
+  void loginSuccess() throws ResponseException {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
@@ -49,7 +49,7 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void loginFailure() {
+  void loginFailure() throws ResponseException {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
@@ -67,7 +67,7 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void logoutSuccess() {
+  void logoutSuccess() throws ResponseException {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 
@@ -82,7 +82,7 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void logoutFailure() {
+  void logoutFailure() throws ResponseException {
     DataAccess database = new MemoryDataAccess();
     UserService service = new UserService(database);
 

@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void createUser(DataAccess database) {
+  void createUser(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
@@ -57,7 +58,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void getUser(DataAccess database) {
+  void getUser(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
@@ -67,7 +68,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void createGame(DataAccess database) {
+  void createGame(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(() -> database.createGame("game1"));
     var game1 = database.getGame("1");
     Assertions.assertEquals("game1", game1.gameName());
@@ -78,7 +79,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void getGame(DataAccess database) {
+  void getGame(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(() -> database.createGame("game1"));
     Assertions.assertDoesNotThrow(() -> database.createGame("game2"));
     var game1 = database.getGame("1");
@@ -93,7 +94,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-    void getManyGames(DataAccess database) {
+    void getManyGames(DataAccess database) throws ResponseException {
     for (int i = 1; i < 20; i++) {
       int finalI=i;
       Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
@@ -134,7 +135,7 @@ public class DataAccessTests {
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void updateGame(DataAccess database) throws InvalidMoveException {
+  void updateGame(DataAccess database) throws InvalidMoveException, ResponseException {
     for (int i = 1; i <= 200; i++) {
       int finalI=i;
       Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));

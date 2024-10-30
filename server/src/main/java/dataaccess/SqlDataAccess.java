@@ -1,12 +1,14 @@
 package dataaccess;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import service.GameService;
 
-import java.lang.module.ResolutionException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -59,7 +61,7 @@ public class SqlDataAccess implements DataAccess {
 
   }
 
-  private void executeStatement(String statement, Object... params) throws ResponseException {
+  private int executeUpdate(String statement, Object... params) throws ResponseException {
     try (var connection = DatabaseManager.getConnection()) {
       try (var preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
         for (var i = 0; i < params.length; i++) {
@@ -70,7 +72,15 @@ public class SqlDataAccess implements DataAccess {
           else if (param == null) preparedStatement.setNull(i + 1, NULL);
         }
         preparedStatement.executeUpdate();
+
+        var resultSet = preparedStatement.getGeneratedKeys();
+        if (resultSet.next()) {
+          return resultSet.getInt(1);
+        }
       }
+
+      return 0;
+
     } catch (DataAccessException | SQLException e) {
       throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
     }
@@ -79,30 +89,79 @@ public class SqlDataAccess implements DataAccess {
   @Override
   public void clear() throws ResponseException {
     var statement = "DROP DATABASE IF EXISTS chess;";
-    executeStatement(statement);
+    executeUpdate(statement);
+    try {
+      configureDatabase();
+    } catch (DataAccessException e) {
+      throw new ResponseException(500, "error in creating database");
+    }
   }
 
   @Override
   public UserData createUser(String username, String password, String email) throws ResponseException {
     var statement = "INSERT INTO user (username, password, email)\n" +
             "VALUES (?, ?, ?);";
-    executeStatement(statement, username, password, email);
+    executeUpdate(statement, username, password, email);
     return new UserData(username, password, email);
   }
 
   @Override
-  public UserData getUser(String username) {
+  public UserData getUser(String username) throws ResponseException {
+    var statement = "SELECT * FROM user WHERE username=?";
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement=connection.prepareStatement(statement)) {
+        preparedStatement.setString(1, username);
+        try (var results=preparedStatement.executeQuery()) {
+          if (results.next()) {
+            return readUser(results);
+          }
+        }
+      }
+    } catch (Exception e) {
+      throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+    }
     return null;
   }
 
   @Override
-  public GameData createGame(String gameName) {
-    return null;
+  public GameData createGame(String gameName) throws ResponseException {
+    var statement = "INSERT INTO game (name, game) VALUES (?, ?);";
+    var game = new ChessGame();
+    var jsonGame = new Gson().toJson(game, ChessGame.class);
+    var id = executeUpdate(statement, gameName, jsonGame);
+
+    return new GameData(Integer.toString(id), gameName, null, null, game);
   }
 
   @Override
-  public GameData getGame(String gameID) {
+  public GameData getGame(String gameID) throws ResponseException {
+    var statement = "SELECT * FROM game WHERE id=?";
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement = connection.prepareStatement(statement)) {
+        preparedStatement.setInt(1, Integer.parseInt(gameID));
+
+        try (var results = preparedStatement.executeQuery(statement)) {
+          if (results.next()) {
+            return readGame(results);
+          }
+        }
+      }
+    } catch (Exception e) {
+      throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+    }
     return null;
+  }
+
+  private GameData readGame(ResultSet results) throws SQLException {
+    var gameID = results.getInt("id");
+    var gameName = results.getString("name");
+    var whiteUser = results.getString("white_username");
+    var blackUser = results.getString("black_username");
+    var gameJson = results.getString("game");
+
+    var game = new Gson().fromJson(gameJson, ChessGame.class);
+
+    return new GameData(Integer.toString(gameID), whiteUser, blackUser, gameName, game);
   }
 
   @Override
@@ -128,5 +187,12 @@ public class SqlDataAccess implements DataAccess {
   @Override
   public void deleteAuthData(AuthData authData) {
 
+  }
+
+  private UserData readUser(ResultSet results) throws SQLException {
+    var username = results.getString("username");
+    var password = results.getString("password");
+    var email = results.getString("email");
+    return new UserData(username, password, email);
   }
 }

@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,11 +16,11 @@ public interface DataAccess {
 //createUser: Create a new user.
   UserData createUser(String username, String password, String email) throws ResponseException;
 //getUser: Retrieve a user with the given username.
-  UserData getUser(String username);
+  UserData getUser(String username) throws ResponseException;
 //createGame: Create a new game.
-  GameData createGame(String gameName);
+  GameData createGame(String gameName) throws ResponseException;
 //getGame: Retrieve a specified game with the given game ID.
-  GameData getGame(String gameID);
+  GameData getGame(String gameID) throws ResponseException;
 //listGames: Retrieve all games.
   Collection<GameData> listGames();
 //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID.

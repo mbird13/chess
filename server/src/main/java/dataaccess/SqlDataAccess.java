@@ -11,6 +11,7 @@ import service.GameService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.sql.Types.NULL;
@@ -140,7 +141,7 @@ public class SqlDataAccess implements DataAccess {
       try (var preparedStatement = connection.prepareStatement(statement)) {
         preparedStatement.setInt(1, Integer.parseInt(gameID));
 
-        try (var results = preparedStatement.executeQuery(statement)) {
+        try (var results = preparedStatement.executeQuery()) {
           if (results.next()) {
             return readGame(results);
           }
@@ -165,8 +166,21 @@ public class SqlDataAccess implements DataAccess {
   }
 
   @Override
-  public Collection<GameData> listGames() {
-    return null;
+  public Collection<GameData> listGames() throws ResponseException {
+    var games = new ArrayList<GameData>();
+    var statement = "SELECT * FROM game";
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement = connection.prepareStatement(statement)) {
+        var resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+          games.add(readGame(resultSet));
+        }
+        return games;
+      }
+    } catch (Exception e) {
+      throw new ResponseException(500, "unable to access database");
+    }
   }
 
   @Override

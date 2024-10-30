@@ -22,7 +22,7 @@ public interface DataAccess {
 //getGame: Retrieve a specified game with the given game ID.
   GameData getGame(String gameID) throws ResponseException;
 //listGames: Retrieve all games.
-  Collection<GameData> listGames();
+  Collection<GameData> listGames() throws ResponseException;
 //updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID.
 // This is used when players join a game or when a move is made.
   GameData updateGame(String gameID, GameData newGameData);

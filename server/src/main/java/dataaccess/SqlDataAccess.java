@@ -17,15 +17,14 @@ public class SqlDataAccess implements DataAccess {
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
               `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`),
+              PRIMARY KEY (`username`)
             )""",
           """
           CREATE TABLE IF NOT EXISTS  auth (
-              `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(256) NOT NULL,
               `auth_token` varchar(256) NOT NULL,
               PRIMARY KEY (`username`),
-              INDEX(authtoken),
+              INDEX(auth_token)
             )""",
           """
            CREATE TABLE IF NOT EXISTS  game (
@@ -33,14 +32,12 @@ public class SqlDataAccess implements DataAccess {
               `name` varchar(256) NOT NULL,
               `white_username` varchar(256) DEFAULT NULL,
               `black_username` varchar(256) DEFAULT NULL,
-              'game' TEXT DEFAULT NULL,
-              PRIMARY KEY (`id`),
-              INDEX(type),
-              INDEX(name)
+              `game` TEXT DEFAULT NULL,
+              PRIMARY KEY (`id`)
             )"""
   };
 
-  SqlDataAccess() throws DataAccessException, ResponseException {
+  public SqlDataAccess() throws DataAccessException, ResponseException {
     configureDatabase();
   }
 

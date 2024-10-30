@@ -3,6 +3,7 @@ package servicehelpers;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SqlDataAccess;
 import model.GameData;
 import service.*;
 import spark.Request;
@@ -23,7 +24,11 @@ public class ServiceHandler {
   }
 
   public ServiceHandler() {
-    database = new MemoryDataAccess();
+    try {
+      database=new SqlDataAccess();
+    } catch (Exception e) {
+      database=new MemoryDataAccess();
+    }
     userService = new UserService(database);
     gameService = new GameService(database);
   }

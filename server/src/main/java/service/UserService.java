@@ -5,6 +5,7 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
 import exception.ResponseException;
+import org.mindrot.jbcrypt.BCrypt;
 import servicehelpers.LoginRequest;
 import servicehelpers.LoginResult;
 import servicehelpers.LogoutRequest;
@@ -44,24 +45,27 @@ public class UserService implements Service {
     if (user != null) {
       throw new ResponseException(403, "Error: already taken");
     }
+    String plainPassword = request.password();
+    String hashedPassword = BCrypt.hashpw(request.password(), BCrypt.gensalt());
 
-    user = database.createUser(request.username(), request.password(), request.email());
+    user = database.createUser(request.username(), hashedPassword, request.email());
 
-    return login(new LoginRequest(user.username(), user.password()));
+    return login(new LoginRequest(user.username(), plainPassword));
   }
 
   public LoginResult login(LoginRequest loginRequest) throws ResponseException {
 
+
     UserData userData = database.getUser(loginRequest.username());
-    if (userData == null || !Objects.equals(userData.password(), loginRequest.password())) {
+    if (userData == null || !BCrypt.checkpw(loginRequest.password(), userData.password())) {
       throw new ResponseException(401, "Error: unauthorized");
     }
 
-    var existingAuth = database.getToken(loginRequest.username());
-
-    if(existingAuth != null) {
-      return new LoginResult(existingAuth.username(), existingAuth.authToken(), null);
-    }
+//    var existingAuth = database.getToken(loginRequest.username());
+//
+//    if(existingAuth != null) {
+//      return new LoginResult(existingAuth.username(), existingAuth.authToken(), null);
+//    }
 
     //create new authToken
     byte[] randomBytes = new byte[TOKEN_LENGTH];

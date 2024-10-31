@@ -30,8 +30,8 @@ public class SqlDataAccess implements DataAccess {
           CREATE TABLE IF NOT EXISTS  auth (
               `username` varchar(256) NOT NULL,
               `auth_token` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`),
-              INDEX(auth_token)
+              PRIMARY KEY (`auth_token`),
+              INDEX(username)
             )""",
           """
            CREATE TABLE IF NOT EXISTS  game (
@@ -218,8 +218,8 @@ public class SqlDataAccess implements DataAccess {
 
   @Override
   public void deleteAuthData(AuthData authData) throws ResponseException {
-    var statement = "DELETE FROM auth WHERE username=?";
-      executeUpdate(statement, authData.username());
+    var statement = "DELETE FROM auth WHERE auth_token=?";
+      executeUpdate(statement, authData.authToken());
   }
 
   public AuthData getToken(String username) throws ResponseException {

@@ -34,7 +34,12 @@ public class GameService implements Service {
     verifyAuthToken(joinGameRequest.authToken());
     AuthData user = database.getAuth(joinGameRequest.authToken());
 
-    GameData oldGameData = database.getGame(joinGameRequest.gameID());
+    GameData oldGameData;
+    try {
+      oldGameData = database.getGame(joinGameRequest.gameID());
+    } catch (ResponseException e) {
+      throw new ResponseException(400, "Error: bad request");
+    }
     if (oldGameData == null) {
       throw new ResponseException(400, "Error: bad request");
     }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import exception.ResponseException;
+import org.mindrot.jbcrypt.BCrypt;
 import servicehelpers.*;
 
 public class ServiceUnitTests {
@@ -48,7 +49,7 @@ public class ServiceUnitTests {
     var loginRequest = new LoginRequest("name", "password");
     Assertions.assertDoesNotThrow(() -> service.login(loginRequest));
 
-    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertTrue(BCrypt.checkpw("password", database.getUser("name").password()));
   }
 
   @Test
@@ -60,13 +61,13 @@ public class ServiceUnitTests {
     Assertions.assertDoesNotThrow(() -> service.register(request));
     var loginRequest = new LoginRequest("name", "password");
     Assertions.assertDoesNotThrow(() -> service.login(loginRequest));
-    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertTrue(BCrypt.checkpw("password", database.getUser("name").password()));
 
     //duplicate username request
     LoginRequest duplicateRequest = new LoginRequest("name", "newPassword");
     Assertions.assertThrows(ResponseException.class, () -> service.login(duplicateRequest));
 
-    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertTrue(BCrypt.checkpw("password", database.getUser("name").password()));
   }
 
   @Test
@@ -76,7 +77,7 @@ public class ServiceUnitTests {
 
     var request = new RegisterRequest("name", "password", "email");
     LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertTrue(BCrypt.checkpw("password", database.getUser("name").password()));
 
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));
@@ -95,7 +96,7 @@ public class ServiceUnitTests {
 
     var request = new RegisterRequest("name", "password", "email");
     LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.register(request));
-    Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
+    Assertions.assertTrue(BCrypt.checkpw("password", database.getUser("name").password()));
 
     LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
     Assertions.assertDoesNotThrow(() -> service.logout(logoutRequest));

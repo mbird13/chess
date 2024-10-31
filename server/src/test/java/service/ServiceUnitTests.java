@@ -2,7 +2,9 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SqlDataAccess;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -36,8 +38,8 @@ public class ServiceUnitTests {
   }
 
   @Test
-  void loginSuccess() throws ResponseException {
-    DataAccess database = new MemoryDataAccess();
+  void loginSuccess() throws ResponseException, DataAccessException {
+    DataAccess database = new SqlDataAccess();
     UserService service = new UserService(database);
 
     var request = new RegisterRequest("name", "password", "email");

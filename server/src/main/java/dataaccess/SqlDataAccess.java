@@ -193,18 +193,53 @@ public class SqlDataAccess implements DataAccess {
   }
 
   @Override
-  public void createAuth(AuthData authData) {
-
+  public void createAuth(AuthData authData) throws ResponseException {
+    var statement = "INSERT INTO auth (username, auth_token) VALUES (?, ?)";
+    executeUpdate(statement, authData.username(), authData.authToken());
   }
 
   @Override
-  public AuthData getAuth(String authToken) {
+  public AuthData getAuth(String authToken) throws ResponseException {
+    var statement = "SELECT * FROM auth WHERE auth_token=?";
+
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement = connection.prepareStatement(statement)) {
+        preparedStatement.setString(1, authToken);
+        var results = preparedStatement.executeQuery();
+        if (results.next()) {
+          return new AuthData(results.getString("auth_token"), results.getString("username"));
+        }
+      }
+    } catch (Exception e) {
+      throw new ResponseException(500, "unable to update database");
+    }
     return null;
   }
 
   @Override
-  public void deleteAuthData(AuthData authData) {
+  public void deleteAuthData(AuthData authData) throws ResponseException {
+    var statement = "DELETE FROM auth WHERE username=?";
+      executeUpdate(statement, authData.username());
+  }
 
+  public AuthData getToken(String username) throws ResponseException {
+    var statement = "SELECT * FROM auth WHERE username=?";
+
+    try (var connection = DatabaseManager.getConnection()) {
+      try (var preparedStatement = connection.prepareStatement(statement)) {
+        preparedStatement.setString(1, username);
+        var results = preparedStatement.executeQuery();
+
+        if (results.next()) {
+          var user = results.getString("username");
+          var auth = results.getString("auth_token");
+          return new AuthData(auth, user);
+        }
+        return null;
+      }
+    } catch (Exception e) {
+      throw new ResponseException(500, "unable to query database");
+    }
   }
 
   private UserData readUser(ResultSet results) throws SQLException {

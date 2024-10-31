@@ -57,6 +57,8 @@ public class UserService implements Service {
       throw new ResponseException(401, "Error: unauthorized");
     }
 
+    var existingAuth = database.getToken(loginRequest.username());
+
     //create new authToken
     byte[] randomBytes = new byte[TOKEN_LENGTH];
     SECURE_RANDOM.nextBytes(randomBytes);

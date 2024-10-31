@@ -27,9 +27,11 @@ public interface DataAccess {
 // This is used when players join a game or when a move is made.
   GameData updateGame(String gameID, GameData newGameData) throws ResponseException;
 //createAuth: Create a new authorization.
-  void createAuth(AuthData authData);
+  void createAuth(AuthData authData) throws ResponseException;
 //getAuth: Retrieve an authorization given an authToken.
-  AuthData getAuth(String authToken);
+  AuthData getAuth(String authToken) throws ResponseException;
 //deleteAuth: Delete an authorization so that it is no longer valid.
-  void deleteAuthData(AuthData authData);
+  void deleteAuthData(AuthData authData) throws ResponseException;
+
+  public AuthData getToken(String username) throws ResponseException;
 }

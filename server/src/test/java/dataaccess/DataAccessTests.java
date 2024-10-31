@@ -32,6 +32,7 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void clear(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
     database.createUser("name", "password", "email");
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     database.createUser("2", "2", "@");
@@ -50,6 +51,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void createUser(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
+
     Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
@@ -59,6 +62,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void getUser(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
+
     Assertions.assertDoesNotThrow(() -> database.createUser("name", "password", "email"));
     Assertions.assertEquals(new UserData("name", "password", "email"), database.getUser("name"));
     Assertions.assertDoesNotThrow(() -> database.createUser("2", "2", "@"));
@@ -69,6 +74,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void createGame(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
+
     Assertions.assertDoesNotThrow(() -> database.createGame("game1"));
     var game1 = database.getGame("1");
     Assertions.assertEquals("game1", game1.gameName());
@@ -80,6 +87,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void getGame(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
+
     Assertions.assertDoesNotThrow(() -> database.createGame("game1"));
     Assertions.assertDoesNotThrow(() -> database.createGame("game2"));
     var game1 = database.getGame("1");
@@ -95,6 +104,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
     void getManyGames(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
+
     for (int i = 1; i < 20; i++) {
       int finalI=i;
       Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
@@ -111,6 +122,8 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void listGames(DataAccess database) {
+    Assertions.assertDoesNotThrow(database::clear);
+
     for (int i = 1; i <= 200; i++) {
       int finalI=i;
       Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
@@ -128,6 +141,7 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void listNoGames(DataAccess database) throws ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
     database.clear();
     var games = Assertions.assertDoesNotThrow(database::listGames);
     Assertions.assertEquals(0, games.size());
@@ -136,6 +150,7 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void updateGame(DataAccess database) throws InvalidMoveException, ResponseException {
+    Assertions.assertDoesNotThrow(database::clear);
     for (int i = 1; i <= 200; i++) {
       int finalI=i;
       Assertions.assertDoesNotThrow(() -> database.createGame(String.valueOf(finalI)));
@@ -160,19 +175,60 @@ public class DataAccessTests {
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void createAuth(DataAccess database) {
-
+    Assertions.assertDoesNotThrow(database::clear);
+    var auth = new AuthData("token", "name");
+    Assertions.assertDoesNotThrow(() -> database.createAuth(auth));
   }
+
+  @ParameterizedTest
+  @MethodSource("DataAccessImplementations")
+  void createDuplicateAuth(DataAccess database) {
+    Assertions.assertDoesNotThrow(database::clear);
+    var auth = new AuthData("token", "name");
+    Assertions.assertDoesNotThrow(() -> database.createAuth(auth));
+
+    Assertions.assertThrows(ResponseException.class, () -> database.createAuth(auth));
+  }
+
+
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
   void getAuth(DataAccess database) {
+    Assertions.assertDoesNotThrow(database::clear);
+    var auth = new AuthData("token", "name");
+    Assertions.assertDoesNotThrow(() -> database.createAuth(auth));
 
+    var storedAuth = Assertions.assertDoesNotThrow(() -> database.getAuth(auth.authToken()));
+    Assertions.assertEquals(auth, storedAuth);
   }
 
   @ParameterizedTest
   @MethodSource("DataAccessImplementations")
-  void deleteAuthData(DataAccess database) {
+  void getNullAuth(DataAccess database) {
+    Assertions.assertDoesNotThrow(database::clear);
+    var auth = new AuthData("token", "name");
+    var storedAuth = Assertions.assertDoesNotThrow(() -> database.getAuth(auth.authToken()));
 
+    Assertions.assertNull(storedAuth);
+  }
+
+
+  @ParameterizedTest
+  @MethodSource("DataAccessImplementations")
+  void deleteAuthData(DataAccess database) {
+    Assertions.assertDoesNotThrow(database::clear);
+    var auth = new AuthData("token", "name");
+    Assertions.assertDoesNotThrow(() -> database.createAuth(auth));
+
+    var storedAuth = Assertions.assertDoesNotThrow(() -> database.getAuth(auth.authToken()));
+    Assertions.assertEquals(auth, storedAuth);
+
+    Assertions.assertDoesNotThrow(() -> database.deleteAuthData(storedAuth));
+
+    var nullAuth = Assertions.assertDoesNotThrow(() -> database.getAuth(auth.authToken()));
+
+    Assertions.assertNull(nullAuth);
   }
 
 }

@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -61,7 +62,10 @@ public class MemoryDataAccess implements DataAccess {
   }
 
   //createAuth: Create a new authorization.
-  public void createAuth(AuthData authData){
+  public void createAuth(AuthData authData) throws ResponseException {
+    if (authDataSet.get(authData.authToken()) != null) {
+      throw new ResponseException(500, "unable to update database");
+    }
     this.authDataSet.put(authData.authToken(), authData);
   }
   //getAuth: Retrieve an authorization given an authToken.
@@ -84,5 +88,9 @@ public class MemoryDataAccess implements DataAccess {
   @Override
   public int hashCode() {
     return Objects.hash(users, authDataSet, games);
+  }
+
+  public AuthData getToken(String username) {
+    return null;
   }
 }

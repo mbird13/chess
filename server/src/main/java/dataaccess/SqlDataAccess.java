@@ -67,10 +67,10 @@ public class SqlDataAccess implements DataAccess {
       try (var preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
         for (var i = 0; i < params.length; i++) {
           var param = params[i];
-          if (param instanceof String p) preparedStatement.setString(i + 1, p);
-          else if (param instanceof Integer p) preparedStatement.setInt(i + 1, p);
-          else if (param instanceof ChessGame p) preparedStatement.setString(i + 1, p.toString());
-          else if (param == null) preparedStatement.setNull(i + 1, NULL);
+          if (param instanceof String p) { preparedStatement.setString(i + 1, p); }
+          else if (param instanceof Integer p) { preparedStatement.setInt(i + 1, p); }
+          else if (param instanceof ChessGame p) { preparedStatement.setString(i + 1, p.toString()); }
+          else if (param == null) { preparedStatement.setNull(i + 1, NULL); }
         }
         preparedStatement.executeUpdate();
 
@@ -93,11 +93,6 @@ public class SqlDataAccess implements DataAccess {
     executeUpdate(statement + "user");
     executeUpdate(statement + "auth");
     executeUpdate(statement + "game");
-//    try {
-//      configureDatabase();
-//    } catch (DataAccessException e) {
-//      throw new ResponseException(500, "error in creating database");
-//    }
   }
 
   @Override
@@ -222,26 +217,6 @@ public class SqlDataAccess implements DataAccess {
   public void deleteAuthData(AuthData authData) throws ResponseException {
     var statement = "DELETE FROM auth WHERE auth_token=?";
       executeUpdate(statement, authData.authToken());
-  }
-
-  public AuthData getToken(String username) throws ResponseException {
-    var statement = "SELECT * FROM auth WHERE username=?";
-
-    try (var connection = DatabaseManager.getConnection()) {
-      try (var preparedStatement = connection.prepareStatement(statement)) {
-        preparedStatement.setString(1, username);
-        var results = preparedStatement.executeQuery();
-
-        if (results.next()) {
-          var user = results.getString("username");
-          var auth = results.getString("auth_token");
-          return new AuthData(auth, user);
-        }
-        return null;
-      }
-    } catch (Exception e) {
-      throw new ResponseException(500, "unable to query database");
-    }
   }
 
   private UserData readUser(ResultSet results) throws SQLException {

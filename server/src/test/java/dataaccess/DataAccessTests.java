@@ -13,16 +13,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.xml.crypto.Data;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.stream.Stream;
 
 public class DataAccessTests {
 
-  public static Stream<Arguments> DataAccessImplementations() throws ResponseException, DataAccessException {
+  public static Stream<Arguments> dataAccessImplementations() throws ResponseException, DataAccessException {
     return Stream.of(
             Arguments.of(new MemoryDataAccess()),
             Arguments.of(new SqlDataAccess())
@@ -30,7 +25,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void clear(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
     database.createUser("name", "password", "email");
@@ -49,7 +44,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void createUser(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -60,7 +55,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void getUser(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -72,7 +67,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void createGame(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -85,7 +80,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void getGame(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -102,7 +97,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
     void getManyGames(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -120,7 +115,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void listGames(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
 
@@ -139,7 +134,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void listNoGames(DataAccess database) throws ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
     database.clear();
@@ -148,7 +143,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void updateGame(DataAccess database) throws InvalidMoveException, ResponseException {
     Assertions.assertDoesNotThrow(database::clear);
     for (int i = 1; i <= 200; i++) {
@@ -173,7 +168,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void createAuth(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
     var auth = new AuthData("token", "name");
@@ -181,7 +176,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void createDuplicateAuth(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
     var auth = new AuthData("token", "name");
@@ -193,7 +188,7 @@ public class DataAccessTests {
 
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void getAuth(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
     var auth = new AuthData("token", "name");
@@ -204,7 +199,7 @@ public class DataAccessTests {
   }
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void getNullAuth(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
     var auth = new AuthData("token", "name");
@@ -215,7 +210,7 @@ public class DataAccessTests {
 
 
   @ParameterizedTest
-  @MethodSource("DataAccessImplementations")
+  @MethodSource("dataAccessImplementations")
   void deleteAuthData(DataAccess database) {
     Assertions.assertDoesNotThrow(database::clear);
     var auth = new AuthData("token", "name");

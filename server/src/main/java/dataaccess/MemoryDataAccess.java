@@ -89,8 +89,4 @@ public class MemoryDataAccess implements DataAccess {
   public int hashCode() {
     return Objects.hash(users, authDataSet, games);
   }
-
-  public AuthData getToken(String username) {
-    return null;
-  }
 }

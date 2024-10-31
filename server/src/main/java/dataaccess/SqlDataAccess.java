@@ -89,13 +89,15 @@ public class SqlDataAccess implements DataAccess {
 
   @Override
   public void clear() throws ResponseException {
-    var statement = "DROP DATABASE IF EXISTS chess;";
-    executeUpdate(statement);
-    try {
-      configureDatabase();
-    } catch (DataAccessException e) {
-      throw new ResponseException(500, "error in creating database");
-    }
+    var statement = "TRUNCATE TABLE ";
+    executeUpdate(statement + "user");
+    executeUpdate(statement + "auth");
+    executeUpdate(statement + "game");
+//    try {
+//      configureDatabase();
+//    } catch (DataAccessException e) {
+//      throw new ResponseException(500, "error in creating database");
+//    }
   }
 
   @Override

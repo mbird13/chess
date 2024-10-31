@@ -59,6 +59,10 @@ public class UserService implements Service {
 
     var existingAuth = database.getToken(loginRequest.username());
 
+    if(existingAuth != null) {
+      return new LoginResult(existingAuth.username(), existingAuth.authToken(), null);
+    }
+
     //create new authToken
     byte[] randomBytes = new byte[TOKEN_LENGTH];
     SECURE_RANDOM.nextBytes(randomBytes);

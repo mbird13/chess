@@ -41,6 +41,7 @@ public class ServiceUnitTests {
   void loginSuccess() throws ResponseException, DataAccessException {
     DataAccess database = new SqlDataAccess();
     UserService service = new UserService(database);
+    database.clear();
 
     var request = new RegisterRequest("name", "password", "email");
     Assertions.assertDoesNotThrow(() -> service.register(request));

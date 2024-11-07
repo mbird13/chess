@@ -2,13 +2,19 @@ import java.util.Scanner;
 
 public class Repl {
 
+  Client client = new InitialClient();
+
   public void run() {
 
     var scanner = new Scanner(System.in);
     String result = "";
     while(!result.equals("quit")) {
       printPrompt();
-      result = scanner.next();
+      String line = scanner.nextLine();
+
+      try {
+        result = client.eval(line);
+      } catch (Exception ignore) {}
     }
   }
 

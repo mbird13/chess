@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.Locale;
+import ui.EscapeSequences;
 
 public class InitialClient implements Client{
   @Override
@@ -17,7 +18,7 @@ public class InitialClient implements Client{
   }
 
   private String invalidInput() {
-    System.out.println("Invalid input. For a list of valid commands, type help");
+    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
     return "";
   }
 
@@ -27,8 +28,12 @@ public class InitialClient implements Client{
   }
 
   private String help() {
-    System.out.println("NOT IMPLEMENTED");
-    return "quit";
+    System.out.println("Options:");
+    System.out.println("Login as existing user: 'login' <USERNAME> <PASSWORD>");
+    System.out.println("Register a new user: 'register' <USERNAME> <PASSWORD> <EMAIL>");
+    System.out.println("Exit the program: 'quit'");
+    System.out.println("See options: 'help'");
+    return "";
   }
 
   private String login(String[] params) {

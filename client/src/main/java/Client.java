@@ -51,49 +51,50 @@ public class Client {
   }
 
   private String makeMove(String[] params) {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
   private String leaveGame() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED: setting state logged in");
+    state = State.LoggedIn;
     return "";
   }
 
   private String resignGame() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
   private String repeatLastMove() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
   private String joinGame(String[] params) {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
     state = State.InGame;
+    System.out.println("NOT IMPLEMENTED: setting state in game");
     return "";
   }
 
   private String observeGame(String[] params) {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
   private String listGames() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
   private String logout() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     state = State.LoggedOut;
     return "";
   }
 
   private String createGame(String[] params) {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+    System.out.println("NOT IMPLEMENTED");
     return "";
   }
 
@@ -108,7 +109,7 @@ public class Client {
   }
 
   private String login(String[] params) {
-    System.out.println("NOT IMPLEMENTED");
+    System.out.println("NOT IMPLEMENTED: setting state logged in");
     state = State.LoggedIn;
     return "";
   }
@@ -140,5 +141,22 @@ public class Client {
       }
     };
     return "";
+  }
+
+  public void printPrompt() {
+    switch (state) {
+      case LoggedOut -> {
+        System.out.print("\nInput Command:");
+      }
+      case LoggedIn -> {
+        System.out.println("\nLogged in");
+        System.out.print("Input Command:");
+
+      }
+      case InGame -> {
+        System.out.println("\n");
+        System.out.print("Make a move:");
+      }
+    };
   }
 }

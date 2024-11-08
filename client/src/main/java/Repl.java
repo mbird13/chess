@@ -9,16 +9,12 @@ public class Repl {
     var scanner = new Scanner(System.in);
     String result = "";
     while(!result.equals("quit")) {
-      printPrompt();
+      client.printPrompt();
       String line = scanner.nextLine();
 
       try {
         result = client.eval(line);
       } catch (Exception ignore) {}
     }
-  }
-
-  private void printPrompt() {
-    System.out.print("Input Command: ");
   }
 }

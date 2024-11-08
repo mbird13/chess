@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class Repl {
 
-  Client client = new InitialClient();
+  Client client = new Client();
 
   public void run() {
 

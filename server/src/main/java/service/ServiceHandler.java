@@ -1,4 +1,4 @@
-package servicehelpers;
+package service;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
@@ -6,6 +6,7 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import model.GameData;
 import service.*;
+import servicehelpers.*;
 import spark.Request;
 import exception.ResponseException;
 

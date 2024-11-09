@@ -13,7 +13,6 @@ import servicehelpers.RegisterRequest;
 
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Objects;
 
 /**
  * Implements services related to creating and logging in users

@@ -22,6 +22,7 @@ public class ServerFacade {
       URL url = (new URI(serverUrl + path)).toURL();
       HttpURLConnection http =(HttpURLConnection) url.openConnection();
       http.setRequestMethod(method);
+      http.setDoOutput(true);
 
       writeBody(request, http);
       http.connect();
@@ -57,7 +58,7 @@ public class ServerFacade {
 
   private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
     var status = http.getResponseCode();
-    if (status == 200) {
+    if (status != 200) {
       throw new ResponseException(status, "failure: " + status);
     }
   }

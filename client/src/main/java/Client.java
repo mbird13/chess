@@ -1,10 +1,14 @@
 import java.util.Arrays;
 
+import exception.ResponseException;
+import servicehelpers.RegisterRequest;
 import ui.EscapeSequences;
 
 public class Client {
 
   private State state = State.LoggedOut;
+
+  private ServerFacade server = new ServerFacade("http://localhost:8080");
 
   public String eval(String input) {
     var tokens = input.toLowerCase().split(" ");
@@ -24,7 +28,7 @@ public class Client {
       case "resign" -> resignGame();
       case "repeat" -> repeatLastMove();
       case "help" -> help();
-      default -> invalidInput();
+      default -> invalidInput("");
     };
   }
 
@@ -36,7 +40,7 @@ public class Client {
       case "logout" -> logout();
       case "create" -> createGame(params);
       case "help" -> help();
-      default -> invalidInput();
+      default -> invalidInput("");
     };
   }
 
@@ -46,7 +50,7 @@ public class Client {
       case "login" -> login(params);
       case "quit" -> "quit";
       case "help" -> help();
-      default -> invalidInput();
+      default -> invalidInput("");
     };
   }
 
@@ -98,13 +102,25 @@ public class Client {
     return "";
   }
 
-  private String invalidInput() {
-    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. For a list of valid commands, type help" + EscapeSequences.RESET_TEXT_COLOR + "\n");
+  private String invalidInput(String message) {
+    System.out.println(
+            EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. " + message
+                    + "\nFor a list of valid commands, type help"
+                    + EscapeSequences.RESET_TEXT_COLOR + "\n");
     return "";
   }
 
   private String register(String[] params) {
-    System.out.println("NOT IMPLEMENTED");
+    if (params.length != 3) {
+      invalidInput("To register a new user: 'register' <USERNAME> <PASSWORD> <EMAIL>");
+    }
+    else {
+      try {
+        server.register(new RegisterRequest(params[0], params[1], params[2]));
+      } catch (ResponseException exception) {
+        System.out.println(exception.getMessage());
+      }
+    }
     return "";
   }
 

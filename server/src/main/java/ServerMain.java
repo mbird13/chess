@@ -1,7 +1,6 @@
-import chess.*;
 import server.Server;
 
-public class Main {
+public class ServerMain {
     public static void main(String[] args) {
         var server = new Server();
         var port = server.run(8080);

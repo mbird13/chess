@@ -17,6 +17,14 @@ public class ServerFacade {
     return makeRequest("POST", "/user", request, LoginResult.class);
   }
 
+  public LoginResult login(LoginRequest loginRequest) throws ResponseException {
+    return makeRequest("POST", "/session", loginRequest, LoginResult.class);
+  }
+
+  public void logout(LogoutRequest logoutRequest) throws ResponseException {
+    makeRequest("DELETE", "/session", logoutRequest, null);
+  }
+
   private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
     try {
       URL url = (new URI(serverUrl + path)).toURL();

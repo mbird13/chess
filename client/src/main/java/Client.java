@@ -1,12 +1,16 @@
 import java.util.Arrays;
 
 import exception.ResponseException;
+import servicehelpers.LoginRequest;
+import servicehelpers.LoginResult;
+import servicehelpers.LogoutRequest;
 import servicehelpers.RegisterRequest;
 import ui.EscapeSequences;
 
 public class Client {
 
   private State state = State.LoggedOut;
+  private String authToken = null;
 
   private ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -92,8 +96,14 @@ public class Client {
   }
 
   private String logout() {
-    System.out.println("NOT IMPLEMENTED");
-    state = State.LoggedOut;
+    try {
+      server.logout(new LogoutRequest(authToken));
+      state = State.LoggedOut;
+      authToken = null;
+      System.out.println("You have logged out");
+    } catch (ResponseException exception) {
+      System.out.println(exception.getMessage());
+    }
     return "";
   }
 
@@ -116,7 +126,10 @@ public class Client {
     }
     else {
       try {
-        server.register(new RegisterRequest(params[0], params[1], params[2]));
+        LoginResult response = server.register(new RegisterRequest(params[0], params[1], params[2]));
+        authToken = response.authToken();
+        state = State.LoggedIn;
+        System.out.println("You are now logged in as " + response.username());
       } catch (ResponseException exception) {
         System.out.println(exception.getMessage());
       }
@@ -125,8 +138,19 @@ public class Client {
   }
 
   private String login(String[] params) {
-    System.out.println("NOT IMPLEMENTED: setting state logged in");
-    state = State.LoggedIn;
+    if (params.length != 2) {
+      invalidInput("To log in as existing user: 'login' <USERNAME> <PASSWORD>");
+    }
+    else {
+      try {
+        LoginResult response = server.login(new LoginRequest(params[0], params[1]));
+        authToken = response.authToken();
+        state = State.LoggedIn;
+        System.out.println("You are now logged in as " + response.username());
+      } catch (ResponseException exception) {
+        System.out.println(exception.getMessage());
+      }
+    }
     return "";
   }
 

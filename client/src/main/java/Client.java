@@ -1,9 +1,8 @@
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPosition;
 import exception.ResponseException;
 import servicehelpers.*;
 import ui.EscapeSequences;
@@ -92,12 +91,48 @@ public class Client {
       var joinRequest = parseJoinParams(params);
       server.joinGame(joinRequest);
       state=State.InGame;
+      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
+      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
     } catch (NumberFormatException e) {
         System.out.println("Invalid game id, please verify input.");
       } catch (Exception exception) {
         System.out.println(exception.getMessage());
       }
     return "";
+  }
+
+  private void printGameBoard(ChessBoard board, ChessGame.TeamColor teamColor) {
+    var bottomColorPositions = board.getPositions(teamColor);
+    var topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
+    String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+    String colLabels ="    a  b  c  d  e  f  g  h    ";
+    if (teamColor == ChessGame.TeamColor.BLACK) {
+      rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+      colLabels ="    h  g  f  e  d  c  b  a    ";
+      topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
+    }
+    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(colLabels);
+    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    for (int row = 0; row < 8; row++) {
+      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+      System.out.print(rowLabels[row]);
+      for (int col = 0; col < 8; col++) {
+        var positionIndex = bottomColorPositions.indexOf(new ChessPosition(row + 1, col + 1));
+        if (positionIndex != -1) {
+          System.out.print(" " + board.getPiece(bottomColorPositions.get(positionIndex)) + " ");
+        } else {
+          System.out.print("   ");
+        }
+      }
+      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+      System.out.print(rowLabels[row]);
+      System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    }
+    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(colLabels);
+    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    System.out.println("");
   }
 
   private String observeGame(String[] params) {
@@ -113,6 +148,9 @@ public class Client {
       for (int i = 0; i < response.size(); i++) {
         System.out.println(i+1 + ": " + response.get(i).gameName());
         gameList.put(i+1, response.get(i));
+      }
+      if (response.isEmpty()) {
+        System.out.println("There are no current games. Create One!!");
       }
     } catch (ResponseException exception) {
       System.out.println(exception.getMessage());

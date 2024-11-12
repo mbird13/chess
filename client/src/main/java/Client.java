@@ -13,6 +13,7 @@ public class Client {
   private State state = State.LoggedOut;
   private String authToken = null;
   private Map<Integer, GameListElement> gameList = null;
+  private String currentGameId = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -66,8 +67,13 @@ public class Client {
   }
 
   private String leaveGame() {
-    System.out.println("NOT IMPLEMENTED: setting state logged in");
-    state = State.LoggedIn;
+    try {
+      server.leaveGame(currentGameId, authToken);
+      System.out.println("You have left the game.");
+      state = State.LoggedIn;
+    } catch (Exception exception) {
+      System.out.println(exception.getMessage());
+    }
     return "";
   }
 
@@ -253,6 +259,7 @@ public class Client {
     }
     else {throw new Exception("Invalid team color");}
 
+    currentGameId = params[0];
     return new JoinGameRequest(authToken, joinColor, gameList.get(joinId).gameID());
   }
 }

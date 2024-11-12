@@ -37,6 +37,10 @@ public class ServerFacade {
     makeRequest("PUT", "/game", joinRequest.authToken(), joinRequest, null);
   }
 
+  public void leaveGame(String currentGameId, String authToken) throws ResponseException {
+    makeRequest("PUT", "/leave_game", authToken, currentGameId, null);
+  }
+
   private <T> T makeRequest(String method, String path, String authentication, Object request, Class<T> responseClass) throws ResponseException {
     try {
       URL url = (new URI(serverUrl + path)).toURL();

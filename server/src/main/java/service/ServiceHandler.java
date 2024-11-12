@@ -74,5 +74,12 @@ public class ServiceHandler {
     var wrapper = new GameListWrapper(games);
     return new Gson().toJson(wrapper);
   }
+
+  public void leaveGame(Request request) throws ResponseException {
+    String authToken = request.headers("authorization");
+    String gameId = new Gson().fromJson(request.body(), String.class);
+    gameService.leaveGame(authToken, gameId);
+
+  }
 }
 

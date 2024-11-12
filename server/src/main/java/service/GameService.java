@@ -29,6 +29,34 @@ public class GameService implements Service {
     return new CreateGameResponse(gameData.gameID());
   }
 
+  public void leaveGame(String authToken, String gameId) throws ResponseException {
+    verifyAuthToken(authToken);
+    AuthData user = database.getAuth(authToken);
+
+    GameData oldGameData;
+    try {
+      oldGameData = database.getGame(gameId);
+    } catch (ResponseException e) {
+      throw new ResponseException(400, "Error: bad request");
+    }
+    if (oldGameData == null) {
+      throw new ResponseException(400, "Error: bad request");
+    }
+    GameData newGameData;
+    if (Objects.equals(oldGameData.whiteUsername(), user.username())) {
+      newGameData = new GameData(oldGameData.gameID(),
+              null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+    } else if (Objects.equals(oldGameData.blackUsername(), user.username())) {
+      newGameData = new GameData(oldGameData.gameID(),
+              oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
+    } else {
+      throw new ResponseException(400, "Error: bad request");
+    }
+
+    database.updateGame(gameId, newGameData);
+
+  }
+
   public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
 
     verifyAuthToken(joinGameRequest.authToken());

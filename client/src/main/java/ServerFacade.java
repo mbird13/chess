@@ -3,7 +3,6 @@ import exception.ResponseException;
 import servicehelpers.*;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 public class ServerFacade {
 
@@ -23,6 +22,10 @@ public class ServerFacade {
 
   public void logout(LogoutRequest logoutRequest) throws ResponseException {
     makeRequest("DELETE", "/session",logoutRequest.authToken(), null, null);
+  }
+
+  public void createGame(CreateGameRequest createGameRequest) throws ResponseException {
+    makeRequest("POST", "/game", createGameRequest.authToken(), createGameRequest, null);
   }
 
   private <T> T makeRequest(String method, String path, String authentication, Object request, Class<T> responseClass) throws ResponseException {

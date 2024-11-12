@@ -1,10 +1,7 @@
 import java.util.Arrays;
 
 import exception.ResponseException;
-import servicehelpers.LoginRequest;
-import servicehelpers.LoginResult;
-import servicehelpers.LogoutRequest;
-import servicehelpers.RegisterRequest;
+import servicehelpers.*;
 import ui.EscapeSequences;
 
 public class Client {
@@ -108,7 +105,15 @@ public class Client {
   }
 
   private String createGame(String[] params) {
-    System.out.println("NOT IMPLEMENTED");
+    if (params.length != 1) {
+      invalidInput("To create a new game: 'create' <GAME NAME>");
+      return "";
+    }
+    try {
+      server.createGame(new CreateGameRequest(authToken, params[0]));
+    } catch (ResponseException e) {
+      System.out.println(e.getMessage());
+    }
     return "";
   }
 

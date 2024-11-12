@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public class GameListWrapper {
 
-  private final Collection<GameListElement> games;
+  public final ArrayList<GameListElement> games;
 
   public GameListWrapper(Collection<GameData> games) {
     this.games = new ArrayList<>();
@@ -17,4 +17,3 @@ public class GameListWrapper {
   }
 }
 
-record GameListElement(String gameID, String whiteUsername, String blackUsername, String gameName) {}

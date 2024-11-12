@@ -3,6 +3,7 @@ import exception.ResponseException;
 import servicehelpers.*;
 import java.io.*;
 import java.net.*;
+import java.util.Collection;
 
 public class ServerFacade {
 
@@ -26,6 +27,10 @@ public class ServerFacade {
 
   public void createGame(CreateGameRequest createGameRequest) throws ResponseException {
     makeRequest("POST", "/game", createGameRequest.authToken(), createGameRequest, null);
+  }
+
+  public GameListWrapper listGames(ListGamesRequest listGamesRequest) throws ResponseException {
+    return makeRequest("GET", "/game",listGamesRequest.authToken(), null, GameListWrapper.class);
   }
 
   private <T> T makeRequest(String method, String path, String authentication, Object request, Class<T> responseClass) throws ResponseException {

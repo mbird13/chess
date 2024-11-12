@@ -1,4 +1,7 @@
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import exception.ResponseException;
 import servicehelpers.*;
@@ -8,6 +11,7 @@ public class Client {
 
   private State state = State.LoggedOut;
   private String authToken = null;
+  private Map<Integer, GameListElement> gameList = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -88,7 +92,17 @@ public class Client {
   }
 
   private String listGames() {
-    System.out.println("NOT IMPLEMENTED");
+    try {
+      gameList = new HashMap<>();
+      var response = server.listGames(new ListGamesRequest(authToken)).games;
+
+      for (int i = 0; i < response.size(); i++) {
+        System.out.println(i+1 + ": " + response.get(i).gameName());
+        gameList.put(i+1, response.get(i));
+      }
+    } catch (ResponseException exception) {
+      System.out.println(exception.getMessage());
+    }
     return "";
   }
 

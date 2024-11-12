@@ -91,8 +91,8 @@ public class Client {
       var joinRequest = parseJoinParams(params);
       server.joinGame(joinRequest);
       state=State.InGame;
-      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
+      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (NumberFormatException e) {
         System.out.println("Invalid game id, please verify input.");
       } catch (Exception exception) {
@@ -101,38 +101,105 @@ public class Client {
     return "";
   }
 
-  private void printGameBoard(ChessBoard board, ChessGame.TeamColor teamColor) {
-    var bottomColorPositions = board.getPositions(teamColor);
-    var topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
+  private void printGameBoard(ChessBoard board, ChessGame.TeamColor BottomColor) {
+    var bottomColorPositions = board.getPositions(BottomColor);
+    var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
     String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
-    String colLabels ="    a  b  c  d  e  f  g  h    ";
-    if (teamColor == ChessGame.TeamColor.BLACK) {
+    String colLabels ="    h  g  f  e  d  c  b  a    ";
+    int startingIndex = 0;
+    int finalIndex = 8;
+    int offset = 1;
+    int bgColor = 0;
+    if (BottomColor == ChessGame.TeamColor.WHITE) {
       rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
-      colLabels ="    h  g  f  e  d  c  b  a    ";
-      topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
+      colLabels ="    a  b  c  d  e  f  g  h    ";
+      topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
+      startingIndex = 7;
+      finalIndex = -1;
     }
-    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-    System.out.print(colLabels);
-    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-    for (int row = 0; row < 8; row++) {
-      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-      System.out.print(rowLabels[row]);
-      for (int col = 0; col < 8; col++) {
-        var positionIndex = bottomColorPositions.indexOf(new ChessPosition(row + 1, col + 1));
-        if (positionIndex != -1) {
-          System.out.print(" " + board.getPiece(bottomColorPositions.get(positionIndex)) + " ");
+    printColLabels(colLabels);
+    for (int row = startingIndex; iterationCheck(row, finalIndex, BottomColor);) {
+      printRowLabels(rowLabels, row);
+      for (int col = startingIndex; iterationCheck(col, finalIndex, BottomColor);) {
+        bgColor = setBgColor(bgColor);
+        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        if (topIndex != -1) {
+          setTopColor(BottomColor);
+          System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        } else if (bottomIndex != -1) {
+          setBottomColor(BottomColor);
+          System.out.print(" " + board.getPiece(bottomColorPositions.get(bottomIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
         } else {
           System.out.print("   ");
         }
+        col = iterate(BottomColor, col);
       }
-      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-      System.out.print(rowLabels[row]);
-      System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+      printRowLabels(rowLabels, row);
+      System.out.println();
+      bgColor++;
+      row = iterate(BottomColor, row);
     }
-    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-    System.out.print(colLabels);
-    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+    printColLabels(colLabels);
     System.out.println("");
+  }
+
+  private void printRowLabels(String[] labels, int row) {
+    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(labels[row]);
+    System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+  }
+
+  private void printColLabels(String label) {
+    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(label);
+    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+  }
+
+  private int setBgColor(int bgColor) {
+    if (bgColor % 2 == 0) {
+      System.out.print("\u001B[102m");
+    }
+    else {
+      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+    }
+    return bgColor+1;
+  }
+
+  private void setBottomColor(ChessGame.TeamColor teamColor) {
+    System.out.print(EscapeSequences.SET_TEXT_BOLD);
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+    else {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+    }
+  }
+
+  private void setTopColor(ChessGame.TeamColor teamColor) {
+    System.out.print(EscapeSequences.SET_TEXT_BOLD);
+    if (teamColor == ChessGame.TeamColor.BLACK) {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+    else {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+    }
+  }
+
+  private boolean iterationCheck(int index, int finalIndex, ChessGame.TeamColor teamColor) {
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      return index > finalIndex;
+    }
+    return index < finalIndex;
+  }
+
+  private int iterate(ChessGame.TeamColor teamColor, int index) {
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      return index-1;
+    }
+    return index+1;
   }
 
   private String observeGame(String[] params) {
@@ -251,6 +318,8 @@ public class Client {
         System.out.println("See instructions: 'help'");
       }
     };
+    printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
+    printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     return "";
   }
 

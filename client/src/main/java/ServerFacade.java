@@ -33,6 +33,10 @@ public class ServerFacade {
     return makeRequest("GET", "/game",listGamesRequest.authToken(), null, GameListWrapper.class);
   }
 
+  public void joinGame(JoinGameRequest joinRequest) throws ResponseException {
+    makeRequest("PUT", "/game", joinRequest.authToken(), joinRequest, null);
+  }
+
   private <T> T makeRequest(String method, String path, String authentication, Object request, Class<T> responseClass) throws ResponseException {
     try {
       URL url = (new URI(serverUrl + path)).toURL();

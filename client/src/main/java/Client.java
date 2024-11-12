@@ -3,6 +3,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import servicehelpers.*;
 import ui.EscapeSequences;
@@ -81,8 +82,15 @@ public class Client {
   }
 
   private String joinGame(String[] params) {
-    state = State.InGame;
-    System.out.println("NOT IMPLEMENTED: setting state in game");
+    try {
+      var joinRequest = parseJoinParams(params);
+      server.joinGame(joinRequest);
+      state=State.InGame;
+    } catch (NumberFormatException e) {
+        System.out.println("Invalid game id, please verify input.");
+      } catch (Exception exception) {
+        System.out.println(exception.getMessage());
+      }
     return "";
   }
 
@@ -187,7 +195,7 @@ public class Client {
         System.out.println("Logout: 'logout'");
         System.out.println("Create a new game: 'create' <GAME NAME>");
         System.out.println("List existing games: 'list'");
-        System.out.println("Join an existing game: 'join' <GAME ID>");
+        System.out.println("Join an existing game: 'join' <GAME ID> <COLOR>");
         System.out.println("Observe an ongoing game: 'observe' <GAME ID>");
         System.out.println("See options: 'help'");
       }
@@ -217,5 +225,34 @@ public class Client {
         System.out.print("Make a move:");
       }
     };
+  }
+
+  private JoinGameRequest parseJoinParams(String[] params) throws Exception {
+    if (params.length != 2) {
+      invalidInput("To join an existing game: 'join' <GAME ID> <COLOR>");
+      throw new Exception();
+    }
+    if (gameList == null) {
+      gameList=new HashMap<>();
+      var response=server.listGames(new ListGamesRequest(authToken)).games;
+      for (int i=0; i < response.size(); i++) {
+        gameList.put(i + 1, response.get(i));
+      }
+    }
+
+    var joinId = Integer.parseInt(params[0]);
+    if (joinId < 1 | joinId > gameList.size()) {
+      throw new Exception("Invalid game Id. Please verify information.");
+    }
+
+    ChessGame.TeamColor joinColor;
+    if (params[1].equalsIgnoreCase("white") | params[1].equalsIgnoreCase("w")) {
+      joinColor =ChessGame.TeamColor.WHITE;
+    } else if (params[1].equalsIgnoreCase("black") | params[1].equalsIgnoreCase("b")) {
+      joinColor =ChessGame.TeamColor.BLACK;
+    }
+    else {throw new Exception("Invalid team color");}
+
+    return new JoinGameRequest(authToken, joinColor, gameList.get(joinId).gameID());
   }
 }

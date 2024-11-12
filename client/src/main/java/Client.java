@@ -12,7 +12,7 @@ public class Client {
   private State state = State.LoggedOut;
   private String authToken = null;
 
-  private ServerFacade server = new ServerFacade("http://localhost:8080");
+  private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
   public String eval(String input) {
     var tokens = input.toLowerCase().split(" ");

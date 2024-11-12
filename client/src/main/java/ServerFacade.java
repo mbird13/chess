@@ -14,24 +14,27 @@ public class ServerFacade {
   }
 
   public LoginResult register(RegisterRequest request) throws ResponseException {
-    return makeRequest("POST", "/user", request, LoginResult.class);
+    return makeRequest("POST", "/user", null, request, LoginResult.class);
   }
 
   public LoginResult login(LoginRequest loginRequest) throws ResponseException {
-    return makeRequest("POST", "/session", loginRequest, LoginResult.class);
+    return makeRequest("POST", "/session",null,  loginRequest, LoginResult.class);
   }
 
   public void logout(LogoutRequest logoutRequest) throws ResponseException {
-    makeRequest("DELETE", "/session", logoutRequest, null);
+    makeRequest("DELETE", "/session",logoutRequest.authToken(), null, null);
   }
 
-  private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+  private <T> T makeRequest(String method, String path, String authentication, Object request, Class<T> responseClass) throws ResponseException {
     try {
       URL url = (new URI(serverUrl + path)).toURL();
       HttpURLConnection http =(HttpURLConnection) url.openConnection();
       http.setRequestMethod(method);
       http.setDoOutput(true);
 
+      if (authentication != null) {
+        http.addRequestProperty("authorization", authentication);
+      }
       writeBody(request, http);
       http.connect();
       throwIfNotSuccessful(http);
@@ -67,7 +70,7 @@ public class ServerFacade {
   private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
     var status = http.getResponseCode();
     if (status != 200) {
-      throw new ResponseException(status, "failure: " + status);
+      throw new ResponseException(status, "failure: " + status +" " + http.getResponseMessage());
     }
   }
 }

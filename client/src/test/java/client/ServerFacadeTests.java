@@ -7,10 +7,7 @@ import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import ServerFacade.ServerFacade;
-import servicehelpers.CreateGameRequest;
-import servicehelpers.LoginRequest;
-import servicehelpers.LogoutRequest;
-import servicehelpers.RegisterRequest;
+import servicehelpers.*;
 
 public class ServerFacadeTests {
 
@@ -153,6 +150,48 @@ public class ServerFacadeTests {
         Assertions.assertEquals(500, exception.statusCode());
     }
 
+    @Test
+    public void listGamesSuccess() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
 
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "1")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "2")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "3")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "4")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "5")));
+
+        var games = Assertions.assertDoesNotThrow(() -> facade.listGames(new ListGamesRequest(auth.authToken())));
+        Assertions.assertEquals(5, games.games.size());
+    }
+
+    @Test
+    public void listGamesFail() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
+
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "1")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "2")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "3")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "4")));
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "5")));
+
+        var exception = Assertions.assertThrows(ResponseException.class, () -> facade.listGames(new ListGamesRequest("invalidAuth")));
+        Assertions.assertEquals(500, exception.statusCode());
+    }
 
 }

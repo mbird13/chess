@@ -234,4 +234,47 @@ public class ServerFacadeTests {
         Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest("invalidAuth", ChessGame.TeamColor.WHITE, "1")));
         Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.BLACK, "invalidId")));
     }
+
+    @Test
+    public void leaveGameSuccess() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
+
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "game")));
+        Assertions.assertEquals("game", database.getGame("1").gameName());
+
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.WHITE, "1")));
+        Assertions.assertEquals("ExistingUser", database.getGame("1").whiteUsername());
+        Assertions.assertDoesNotThrow(() -> facade.leaveGame("1", auth.authToken()));
+        Assertions.assertNull(database.getGame("1").whiteUsername());
+    }
+
+    @Test
+    public void leaveGameFail() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
+
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "game")));
+        Assertions.assertEquals("game", database.getGame("1").gameName());
+
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.WHITE, "1")));
+        Assertions.assertEquals("ExistingUser", database.getGame("1").whiteUsername());
+        Assertions.assertThrows(ResponseException.class, () -> facade.leaveGame("invalidID", auth.authToken()));
+        Assertions.assertThrows(ResponseException.class, () -> facade.leaveGame("1", "invalidAuth"));
+        Assertions.assertEquals("ExistingUser", database.getGame("1").whiteUsername());
+    }
 }

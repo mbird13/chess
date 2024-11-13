@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import ServerFacade.ServerFacade;
 import servicehelpers.LoginRequest;
+import servicehelpers.LogoutRequest;
 import servicehelpers.RegisterRequest;
 
 public class ServerFacadeTests {
@@ -85,5 +86,47 @@ public class ServerFacadeTests {
         Assertions.assertEquals(500, exception.statusCode());
         database.clear();
     }
+
+    @Test
+    public void logoutSuccess() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
+
+        database.clear();
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.logout(new LogoutRequest(auth.authToken())));
+        Assertions.assertNull(database.getAuth(auth.authToken()));
+        database.clear();
+    }
+
+    @Test
+    public void logoutFail() throws ResponseException, DataAccessException {
+        var facade = new ServerFacade("http://localhost:8080");
+        var database = new SqlDataAccess();
+
+        database.clear();
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+
+        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        Assertions.assertEquals("email", database.getUser("ExistingUser").email());
+        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+
+        Assertions.assertDoesNotThrow(() -> facade.logout(new LogoutRequest(auth.authToken())));
+        Assertions.assertNull(database.getAuth(auth.authToken()));
+
+        var exception = Assertions.assertThrows(ResponseException.class, () -> facade.logout(new LogoutRequest(auth.authToken())));
+        Assertions.assertEquals(500, exception.statusCode());
+
+        database.clear();
+    }
+
+
 
 }

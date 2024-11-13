@@ -160,10 +160,10 @@ public class Client {
 
   private int setBgColor(int bgColor) {
     if (bgColor % 2 == 0) {
-      System.out.print("\u001B[102m");
+      System.out.print("\u001B[48;2;184;160;75m");
     }
     else {
-      System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+      System.out.print("\u001B[48;2;156;123;9m");
     }
     return bgColor+1;
   }

@@ -117,9 +117,6 @@ public class ChessPiece {
     @Override
     public String toString() {
         StringBuilder r = new StringBuilder();
-//        if (pieceColor == ChessGame.TeamColor.WHITE) {
-//            r.append("w");
-//        }
         if (type == PieceType.PAWN) {
             r.append("p");
         }

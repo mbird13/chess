@@ -1,11 +1,10 @@
-package ServerFacade;
+package serverfacade;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
 import servicehelpers.*;
 import java.io.*;
 import java.net.*;
-import java.util.Collection;
 
 public class ServerFacade {
 

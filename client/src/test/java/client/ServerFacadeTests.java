@@ -4,21 +4,24 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.SqlDataAccess;
 import exception.ResponseException;
-import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
-import ServerFacade.ServerFacade;
+import serverfacade.ServerFacade;
 import servicehelpers.*;
 
 public class ServerFacadeTests {
 
     private static Server server;
+    private static ServerFacade facade;
+    private static SqlDataAccess database;
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws ResponseException, DataAccessException {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        facade = new ServerFacade("http://localhost:" + port);
+        database = new SqlDataAccess();
     }
 
     @BeforeEach
@@ -28,16 +31,14 @@ public class ServerFacadeTests {
     }
 
     @AfterAll
-    static void stopServer() {
+    static void stopServer() throws ResponseException {
+        database.clear();
         server.stop();
     }
 
 
     @Test
-    public void registerSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void registerSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -46,10 +47,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void registerFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void registerFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -59,10 +57,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void loginSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void loginSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -72,23 +67,18 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void loginFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void loginFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
-        var exception = Assertions.assertThrows(ResponseException.class, () -> facade.login(new LoginRequest("ExistingUser", "wrongPassword")));
+        var exception = Assertions.assertThrows(ResponseException.class,
+                () -> facade.login(new LoginRequest("ExistingUser", "wrongPassword")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
         Assertions.assertEquals(500, exception.statusCode());
     }
 
     @Test
-    public void logoutSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void logoutSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -101,10 +91,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void logoutFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -120,10 +107,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void createGameSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void createGameSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -136,10 +120,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void createGameFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void createGameFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -147,15 +128,13 @@ public class ServerFacadeTests {
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
         Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
 
-        var exception = Assertions.assertThrows(ResponseException.class, () -> facade.createGame(new CreateGameRequest("invalidAuth", "game")));
+        var exception = Assertions.assertThrows(ResponseException.class,
+                () -> facade.createGame(new CreateGameRequest("invalidAuth", "game")));
         Assertions.assertEquals(500, exception.statusCode());
     }
 
     @Test
-    public void listGamesSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void listGamesSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -174,10 +153,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGamesFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void listGamesFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -196,10 +172,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void joinGameSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -217,10 +190,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void joinGameFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -236,10 +206,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void leaveGameSuccess() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void leaveGameSuccess() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -257,10 +224,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void leaveGameFail() throws ResponseException, DataAccessException {
-        var facade = new ServerFacade("http://localhost:8080");
-        var database = new SqlDataAccess();
-
+    public void leaveGameFail() throws ResponseException {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
@@ -271,7 +235,8 @@ public class ServerFacadeTests {
         Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "game")));
         Assertions.assertEquals("game", database.getGame("1").gameName());
 
-        Assertions.assertDoesNotThrow(() -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.WHITE, "1")));
+        Assertions.assertDoesNotThrow(
+                () -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.WHITE, "1")));
         Assertions.assertEquals("ExistingUser", database.getGame("1").whiteUsername());
         Assertions.assertThrows(ResponseException.class, () -> facade.leaveGame("invalidID", auth.authToken()));
         Assertions.assertThrows(ResponseException.class, () -> facade.leaveGame("1", "invalidAuth"));

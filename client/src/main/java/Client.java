@@ -1,6 +1,6 @@
 import java.util.*;
 
-import ServerFacade.ServerFacade;
+import serverfacade.ServerFacade;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPosition;
@@ -102,8 +102,8 @@ public class Client {
     return "";
   }
 
-  private void printGameBoard(ChessBoard board, ChessGame.TeamColor BottomColor) {
-    var bottomColorPositions = board.getPositions(BottomColor);
+  private void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
+    var bottomColorPositions = board.getPositions(bottomColor);
     var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
     String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
     String colLabels ="    h  g  f  e  d  c  b  a    ";
@@ -111,7 +111,7 @@ public class Client {
     int finalIndex = 8;
     int offset = 1;
     int bgColor = 0;
-    if (BottomColor == ChessGame.TeamColor.WHITE) {
+    if (bottomColor == ChessGame.TeamColor.WHITE) {
       rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
       colLabels ="    a  b  c  d  e  f  g  h    ";
       topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
@@ -119,29 +119,29 @@ public class Client {
       finalIndex = -1;
     }
     printColLabels(colLabels);
-    for (int row = startingIndex; iterationCheck(row, finalIndex, BottomColor);) {
+    for (int row = startingIndex; iterationCheck(row, finalIndex, bottomColor);) {
       printRowLabels(rowLabels, row);
-      for (int col = startingIndex; iterationCheck(col, finalIndex, BottomColor);) {
+      for (int col = startingIndex; iterationCheck(col, finalIndex, bottomColor);) {
         bgColor = setBgColor(bgColor);
         var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
         var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
         if (topIndex != -1) {
-          setTopColor(BottomColor);
+          setTopColor(bottomColor);
           System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
           System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
         } else if (bottomIndex != -1) {
-          setBottomColor(BottomColor);
+          setBottomColor(bottomColor);
           System.out.print(" " + board.getPiece(bottomColorPositions.get(bottomIndex)) + " ");
           System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
         } else {
           System.out.print("   ");
         }
-        col = iterate(BottomColor, col);
+        col = iterate(bottomColor, col);
       }
       printRowLabels(rowLabels, row);
       System.out.println();
       bgColor++;
-      row = iterate(BottomColor, row);
+      row = iterate(bottomColor, row);
     }
     printColLabels(colLabels);
     System.out.println("");

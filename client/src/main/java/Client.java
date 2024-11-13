@@ -62,7 +62,7 @@ public class Client {
   }
 
   private String makeMove(String[] params) {
-    System.out.println("NOT IMPLEMENTED");
+    printErrorMessage("NOT IMPLEMENTED");
     return "";
   }
 
@@ -78,12 +78,12 @@ public class Client {
   }
 
   private String resignGame() {
-    System.out.println("NOT IMPLEMENTED");
+    printErrorMessage("NOT IMPLEMENTED");
     return "";
   }
 
   private String repeatLastMove() {
-    System.out.println("NOT IMPLEMENTED");
+    printErrorMessage("NOT IMPLEMENTED");
     return "";
   }
 
@@ -95,9 +95,9 @@ public class Client {
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (NumberFormatException e) {
-        System.out.println("Invalid game id, please verify input.");
+        printErrorMessage("Invalid game id, please verify input.");
       } catch (Exception exception) {
-        System.out.println(exception.getMessage());
+        printErrorMessage(exception.getMessage());
       }
     return "";
   }
@@ -125,7 +125,7 @@ public class Client {
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      printErrorMessage(e.getMessage());
     }
     return "";
   }
@@ -143,7 +143,7 @@ public class Client {
         System.out.println("There are no current games. Create One!!");
       }
     } catch (ResponseException exception) {
-      System.out.println(exception.getMessage());
+      printErrorMessage(exception.getMessage());
     }
     return "";
   }
@@ -155,7 +155,7 @@ public class Client {
       authToken = null;
       System.out.println("You have logged out");
     } catch (ResponseException exception) {
-      System.out.println(exception.getMessage());
+      printErrorMessage(exception.getMessage());
     }
     return "";
   }
@@ -168,15 +168,20 @@ public class Client {
     try {
       server.createGame(new CreateGameRequest(authToken, params[0]));
     } catch (ResponseException e) {
-      System.out.println(e.getMessage());
+      printErrorMessage(e.getMessage());
     }
     return "";
   }
 
   private String invalidInput(String message) {
+    printErrorMessage("Invalid input. " + message
+                    + "\nFor a list of valid commands, type help");
+    return "";
+  }
+
+  private String printErrorMessage(String message) {
     System.out.println(
-            EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. " + message
-                    + "\nFor a list of valid commands, type help"
+            EscapeSequences.SET_TEXT_COLOR_RED + message
                     + EscapeSequences.RESET_TEXT_COLOR + "\n");
     return "";
   }
@@ -192,7 +197,7 @@ public class Client {
         state = State.LoggedIn;
         System.out.println("You are now logged in as " + response.username());
       } catch (ResponseException exception) {
-        System.out.println(exception.getMessage());
+        printErrorMessage(exception.getMessage());
       }
     }
     return "";
@@ -209,7 +214,7 @@ public class Client {
         state = State.LoggedIn;
         System.out.println("You are now logged in as " + response.username());
       } catch (ResponseException exception) {
-        System.out.println(exception.getMessage());
+        printErrorMessage("The username or password is incorrect. Try again.");
       }
     }
     return "";
@@ -263,8 +268,8 @@ public class Client {
 
   private JoinGameRequest parseJoinParams(String[] params) throws Exception {
     if (params.length != 2) {
-      invalidInput("To join an existing game: 'join' <GAME ID> <COLOR>");
-      throw new Exception();
+      throw new Exception("Invalid input. To join an existing game: " +
+              "'join' <GAME ID> <COLOR>\nFor a list of valid commands, type help.");
     }
     if (gameList == null) {
       gameList=new HashMap<>();

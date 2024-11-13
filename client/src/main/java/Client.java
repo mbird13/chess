@@ -102,109 +102,31 @@ public class Client {
     return "";
   }
 
-  private void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
-    var bottomColorPositions = board.getPositions(bottomColor);
-    var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
-    String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
-    String colLabels ="    h  g  f  e  d  c  b  a    ";
-    int startingIndex = 0;
-    int finalIndex = 8;
-    int offset = 1;
-    int bgColor = 0;
-    if (bottomColor == ChessGame.TeamColor.WHITE) {
-      rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
-      colLabels ="    a  b  c  d  e  f  g  h    ";
-      topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
-      startingIndex = 7;
-      finalIndex = -1;
-    }
-    printColLabels(colLabels);
-    for (int row = startingIndex; iterationCheck(row, finalIndex, bottomColor);) {
-      printRowLabels(rowLabels, row);
-      for (int col = startingIndex; iterationCheck(col, finalIndex, bottomColor);) {
-        bgColor = setBgColor(bgColor);
-        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
-        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
-        if (topIndex != -1) {
-          setTopColor(bottomColor);
-          System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
-          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
-        } else if (bottomIndex != -1) {
-          setBottomColor(bottomColor);
-          System.out.print(" " + board.getPiece(bottomColorPositions.get(bottomIndex)) + " ");
-          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
-        } else {
-          System.out.print("   ");
-        }
-        col = iterate(bottomColor, col);
-      }
-      printRowLabels(rowLabels, row);
-      System.out.println();
-      bgColor++;
-      row = iterate(bottomColor, row);
-    }
-    printColLabels(colLabels);
-    System.out.println("");
-  }
-
-  private void printRowLabels(String[] labels, int row) {
-    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-    System.out.print(labels[row]);
-    System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-  }
-
-  private void printColLabels(String label) {
-    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
-    System.out.print(label);
-    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-  }
-
-  private int setBgColor(int bgColor) {
-    if (bgColor % 2 == 0) {
-      System.out.print("\u001B[48;2;184;160;75m");
-    }
-    else {
-      System.out.print("\u001B[48;2;156;123;9m");
-    }
-    return bgColor+1;
-  }
-
-  private void setBottomColor(ChessGame.TeamColor teamColor) {
-    System.out.print(EscapeSequences.SET_TEXT_BOLD);
-    if (teamColor == ChessGame.TeamColor.WHITE) {
-      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
-    }
-    else {
-      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-    }
-  }
-
-  private void setTopColor(ChessGame.TeamColor teamColor) {
-    System.out.print(EscapeSequences.SET_TEXT_BOLD);
-    if (teamColor == ChessGame.TeamColor.BLACK) {
-      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
-    }
-    else {
-      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-    }
-  }
-
-  private boolean iterationCheck(int index, int finalIndex, ChessGame.TeamColor teamColor) {
-    if (teamColor == ChessGame.TeamColor.WHITE) {
-      return index > finalIndex;
-    }
-    return index < finalIndex;
-  }
-
-  private int iterate(ChessGame.TeamColor teamColor, int index) {
-    if (teamColor == ChessGame.TeamColor.WHITE) {
-      return index-1;
-    }
-    return index+1;
-  }
-
   private String observeGame(String[] params) {
-    System.out.println("NOT IMPLEMENTED");
+    try {
+      if (params.length != 1) {
+        invalidInput("To observe a game: 'observe' <GAME ID>");
+        throw new Exception("");
+      }
+      if (gameList == null) {
+        gameList=new HashMap<>();
+        ArrayList<GameListElement> response=null;
+        response=server.listGames(new ListGamesRequest(authToken)).games;
+
+        for (int i=0; i < response.size(); i++) {
+          gameList.put(i + 1, response.get(i));
+        }
+      }
+      var joinId = Integer.parseInt(params[0]);
+      if (joinId < 1 | joinId > gameList.size()) {
+        throw new Exception("Invalid game Id. Please verify information.");
+      }
+
+      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
+      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
     return "";
   }
 
@@ -319,8 +241,6 @@ public class Client {
         System.out.println("See instructions: 'help'");
       }
     };
-    printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
-    printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     return "";
   }
 
@@ -369,5 +289,106 @@ public class Client {
 
     currentGameId = params[0];
     return new JoinGameRequest(authToken, joinColor, gameList.get(joinId).gameID());
+  }
+
+  private void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
+    var bottomColorPositions = board.getPositions(bottomColor);
+    var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
+    String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+    String colLabels ="    h  g  f  e  d  c  b  a    ";
+    int startingIndex = 0;
+    int finalIndex = 8;
+    int offset = 1;
+    int bgColor = 0;
+    if (bottomColor == ChessGame.TeamColor.WHITE) {
+      rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+      colLabels ="    a  b  c  d  e  f  g  h    ";
+      topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
+      startingIndex = 7;
+      finalIndex = -1;
+    }
+    printColLabels(colLabels);
+    for (int row = startingIndex; iterationCheck(row, finalIndex, bottomColor);) {
+      printRowLabels(rowLabels, row);
+      for (int col = startingIndex; iterationCheck(col, finalIndex, bottomColor);) {
+        bgColor = setBgColor(bgColor);
+        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        if (topIndex != -1) {
+          setTopColor(bottomColor);
+          System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        } else if (bottomIndex != -1) {
+          setBottomColor(bottomColor);
+          System.out.print(" " + board.getPiece(bottomColorPositions.get(bottomIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        } else {
+          System.out.print("   ");
+        }
+        col = iterate(bottomColor, col);
+      }
+      printRowLabels(rowLabels, row);
+      System.out.println();
+      bgColor++;
+      row = iterate(bottomColor, row);
+    }
+    printColLabels(colLabels);
+    System.out.println("");
+  }
+
+  private void printRowLabels(String[] labels, int row) {
+    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(labels[row]);
+    System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+  }
+
+  private void printColLabels(String label) {
+    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(label);
+    System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+  }
+
+  private int setBgColor(int bgColor) {
+    if (bgColor % 2 == 0) {
+      System.out.print("\u001B[48;2;184;160;75m");
+    }
+    else {
+      System.out.print("\u001B[48;2;156;123;9m");
+    }
+    return bgColor+1;
+  }
+
+  private void setBottomColor(ChessGame.TeamColor teamColor) {
+    System.out.print(EscapeSequences.SET_TEXT_BOLD);
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+    else {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+    }
+  }
+
+  private void setTopColor(ChessGame.TeamColor teamColor) {
+    System.out.print(EscapeSequences.SET_TEXT_BOLD);
+    if (teamColor == ChessGame.TeamColor.BLACK) {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+    else {
+      System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+    }
+  }
+
+  private boolean iterationCheck(int index, int finalIndex, ChessGame.TeamColor teamColor) {
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      return index > finalIndex;
+    }
+    return index < finalIndex;
+  }
+
+  private int iterate(ChessGame.TeamColor teamColor, int index) {
+    if (teamColor == ChessGame.TeamColor.WHITE) {
+      return index-1;
+    }
+    return index+1;
   }
 }

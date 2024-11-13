@@ -201,8 +201,10 @@ public class ServerFacadeTests {
         Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(auth.authToken(), "game")));
         Assertions.assertEquals("game", database.getGame("1").gameName());
 
-        Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest("invalidAuth", ChessGame.TeamColor.WHITE, "1")));
-        Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.BLACK, "invalidId")));
+        Assertions.assertThrows(ResponseException.class,
+                () -> facade.joinGame(new JoinGameRequest("invalidAuth", ChessGame.TeamColor.WHITE, "1")));
+        Assertions.assertThrows(ResponseException.class,
+                () -> facade.joinGame(new JoinGameRequest(auth.authToken(), ChessGame.TeamColor.BLACK, "invalidId")));
     }
 
     @Test

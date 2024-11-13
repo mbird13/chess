@@ -80,9 +80,9 @@ public class ServerFacadeTests {
         Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest("ExistingUser", "password", "email")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
 
-        var auth = Assertions.assertDoesNotThrow(() -> facade.login(new LoginRequest("ExistingUser", "password")));
+        var exception = Assertions.assertThrows(ResponseException.class, () -> facade.login(new LoginRequest("ExistingUser", "wrongPassword")));
         Assertions.assertEquals("email", database.getUser("ExistingUser").email());
-        Assertions.assertEquals("ExistingUser", database.getAuth(auth.authToken()).username());
+        Assertions.assertEquals(500, exception.statusCode());
         database.clear();
     }
 

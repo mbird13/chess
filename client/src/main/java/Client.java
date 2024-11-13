@@ -1,5 +1,6 @@
 import java.util.*;
 
+import ServerFacade.ServerFacade;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPosition;
@@ -147,13 +148,13 @@ public class Client {
   }
 
   private void printRowLabels(String[] labels, int row) {
-    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
     System.out.print(labels[row]);
     System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
   }
 
   private void printColLabels(String label) {
-    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK + EscapeSequences.SET_TEXT_COLOR_WHITE);
+    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE);
     System.out.print(label);
     System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
   }

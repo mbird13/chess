@@ -128,7 +128,7 @@ public class Client {
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (Exception e) {
-      printErrorMessage(e.getMessage());
+      printErrorMessage("Invalid game number. Please verify information.");
     }
     return "";
   }

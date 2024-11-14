@@ -68,7 +68,7 @@ public class Client {
 
   private String leaveGame() {
     try {
-      server.leaveGame(currentGameId, authToken);
+      //add leave game websocket call
       System.out.println("You have left the game.");
       state = State.LoggedIn;
     } catch (Exception exception) {
@@ -95,8 +95,11 @@ public class Client {
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (NumberFormatException e) {
-        printErrorMessage("Invalid game id, please verify input.");
-      } catch (Exception exception) {
+        printErrorMessage("Invalid game number, please verify input.");
+      } catch (ResponseException e) {
+      printErrorMessage("That color is already taken.");
+    }
+    catch (Exception exception) {
         printErrorMessage(exception.getMessage());
       }
     return "";
@@ -105,7 +108,7 @@ public class Client {
   private String observeGame(String[] params) {
     try {
       if (params.length != 1) {
-        invalidInput("To observe a game: 'observe' <GAME ID>");
+        invalidInput("To observe a game: 'observe' <GAME NUMBER>");
         throw new Exception("");
       }
       if (gameList == null) {
@@ -119,7 +122,7 @@ public class Client {
       }
       var joinId = Integer.parseInt(params[0]);
       if (joinId < 1 | joinId > gameList.size()) {
-        throw new Exception("Invalid game Id. Please verify information.");
+        throw new Exception("Invalid game number. Please verify information.");
       }
 
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
@@ -136,11 +139,13 @@ public class Client {
       var response = server.listGames(new ListGamesRequest(authToken)).games;
 
       for (int i = 0; i < response.size(); i++) {
-        System.out.println(i+1 + ": " + response.get(i).gameName());
+        String whitePlayer = response.get(i).whiteUsername() == null ? "" : ", White Player: " + response.get(i).whiteUsername();
+        String blackPlayer = response.get(i).blackUsername() == null ? "" : ", Black Player: " + response.get(i).blackUsername();
+        System.out.println(i+1 + ": " + response.get(i).gameName() + whitePlayer + blackPlayer);
         gameList.put(i+1, response.get(i));
       }
       if (response.isEmpty()) {
-        System.out.println("There are no current games. Create One!!");
+        System.out.println("There are no current games. Create one!!");
       }
     } catch (ResponseException exception) {
       printErrorMessage(exception.getMessage());
@@ -197,7 +202,7 @@ public class Client {
         state = State.LoggedIn;
         System.out.println("You are now logged in as " + response.username());
       } catch (ResponseException exception) {
-        printErrorMessage(exception.getMessage());
+        printErrorMessage("Username already taken.");
       }
     }
     return "";
@@ -234,8 +239,8 @@ public class Client {
         System.out.println("Logout: 'logout'");
         System.out.println("Create a new game: 'create' <GAME NAME>");
         System.out.println("List existing games: 'list'");
-        System.out.println("Join an existing game: 'join' <GAME ID> <COLOR>");
-        System.out.println("Observe an ongoing game: 'observe' <GAME ID>");
+        System.out.println("Join an existing game: 'join' <GAME NUMBER> <COLOR>");
+        System.out.println("Observe an ongoing game: 'observe' <GAME NUMBER>");
         System.out.println("See options: 'help'");
       }
       case InGame -> {
@@ -269,7 +274,7 @@ public class Client {
   private JoinGameRequest parseJoinParams(String[] params) throws Exception {
     if (params.length != 2) {
       throw new Exception("Invalid input. To join an existing game: " +
-              "'join' <GAME ID> <COLOR>\nFor a list of valid commands, type help.");
+              "'join' <GAME NUMBER> <COLOR>\nFor a list of valid commands, type help.");
     }
     if (gameList == null) {
       gameList=new HashMap<>();
@@ -281,7 +286,7 @@ public class Client {
 
     var joinId = Integer.parseInt(params[0]);
     if (joinId < 1 | joinId > gameList.size()) {
-      throw new Exception("Invalid game Id. Please verify information.");
+      throw new Exception("Invalid game number. Please verify information.");
     }
 
     ChessGame.TeamColor joinColor;
@@ -299,26 +304,31 @@ public class Client {
   private void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
     var bottomColorPositions = board.getPositions(bottomColor);
     var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
-    String[] rowLabels = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+    String[] rowLabels = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
     String colLabels ="    h  g  f  e  d  c  b  a    ";
-    int startingIndex = 0;
-    int finalIndex = 8;
-    int offset = 1;
+    int rowStartingIndex = 0;
+    int rowFinalIndex = 8;
+    int colStartingIndex = 7;
+    int colFinalIndex = -1;
+    int rowOffset = 1;
+    int colOffset = 0;
     int bgColor = 0;
     if (bottomColor == ChessGame.TeamColor.WHITE) {
-      rowLabels =new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+      //rowLabels =new String[] {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
       colLabels ="    a  b  c  d  e  f  g  h    ";
       topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
-      startingIndex = 7;
-      finalIndex = -1;
+      rowStartingIndex = 7;
+      rowFinalIndex = -1;
+      colStartingIndex = 0;
+      colFinalIndex = 8;
     }
     printColLabels(colLabels);
-    for (int row = startingIndex; iterationCheck(row, finalIndex, bottomColor);) {
+    for (int row = rowStartingIndex; iterationCheck(row, rowFinalIndex);) {
       printRowLabels(rowLabels, row);
-      for (int col = startingIndex; iterationCheck(col, finalIndex, bottomColor);) {
+      for (int col = colStartingIndex; iterationCheck(col, colFinalIndex);) {
         bgColor = setBgColor(bgColor);
-        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
-        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        var topIndex = topColorPositions.indexOf(new ChessPosition(row + rowOffset, col + rowOffset));
+        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + rowOffset, col + rowOffset));
         if (topIndex != -1) {
           setTopColor(bottomColor);
           System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
@@ -330,12 +340,12 @@ public class Client {
         } else {
           System.out.print("   ");
         }
-        col = iterate(bottomColor, col);
+        col = iterate(colFinalIndex, col);
       }
       printRowLabels(rowLabels, row);
       System.out.println();
       bgColor++;
-      row = iterate(bottomColor, row);
+      row = iterate(rowFinalIndex, row);
     }
     printColLabels(colLabels);
     System.out.println("");
@@ -383,15 +393,15 @@ public class Client {
     }
   }
 
-  private boolean iterationCheck(int index, int finalIndex, ChessGame.TeamColor teamColor) {
-    if (teamColor == ChessGame.TeamColor.WHITE) {
+  private boolean iterationCheck(int index, int finalIndex) {
+    if (finalIndex == -1) {
       return index > finalIndex;
     }
     return index < finalIndex;
   }
 
-  private int iterate(ChessGame.TeamColor teamColor, int index) {
-    if (teamColor == ChessGame.TeamColor.WHITE) {
+  private int iterate(int finalIndex, int index) {
+    if (finalIndex == -1) {
       return index-1;
     }
     return index+1;

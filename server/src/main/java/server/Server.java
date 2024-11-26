@@ -8,9 +8,11 @@ import exception.ResponseException;
 public class Server {
 
     private final ServiceHandler chessService;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         chessService = new ServiceHandler();
+        webSocketHandler = new WebSocketHandler();
     }
 
     public int run(int desiredPort) {
@@ -19,6 +21,8 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws", webSocketHandler);
+
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);

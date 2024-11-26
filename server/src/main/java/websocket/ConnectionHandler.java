@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 public class ConnectionHandler {
@@ -31,6 +32,20 @@ public class ConnectionHandler {
     for (var user : usersToNotify) {
       if (user.session.isOpen()) {
         user.send(new Gson().toJson(message));
+      }
+      else {
+        remove(gameID, user.username);
+      }
+    }
+  }
+
+  public void loadGame(LoadGameMessage message, Integer gameID, String username) throws IOException {
+    var users = connections.getOrDefault(gameID, new ArrayList<>());
+    for (var user : users) {
+      if (user.session.isOpen()) {
+        if (user.username.equals(username)) {
+          user.send(new Gson().toJson(message));
+        }
       }
       else {
         remove(gameID, user.username);

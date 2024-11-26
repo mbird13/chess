@@ -15,6 +15,7 @@ public class Client {
   private Map<Integer, GameListElement> gameList = null;
   private String currentGameId = null;
   private WebSocketFacade webSocketFacade = null;
+  private ChessGame.TeamColor myColor = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -94,9 +95,8 @@ public class Client {
       server.joinGame(joinRequest);
       webSocketFacade = new WebSocketFacade("http://localhost:8080", this);
       webSocketFacade.joinGame(joinRequest);
-      state=State.InGame;
-      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
-      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
+      state = State.InGame;
+      myColor = joinRequest.playerColor();
     } catch (NumberFormatException e) {
         printErrorMessage("Invalid game number, please verify input.");
       } catch (ResponseException e) {
@@ -105,7 +105,7 @@ public class Client {
     catch (Exception exception) {
         printErrorMessage(exception.getMessage());
       }
-    return "";
+    return "join";
   }
 
   private String observeGame(String[] params) {
@@ -133,7 +133,7 @@ public class Client {
     } catch (Exception e) {
       printErrorMessage("Invalid game number. Please verify information.");
     }
-    return "";
+    return "join";
   }
 
   private String listGames() {
@@ -412,5 +412,9 @@ public class Client {
       return index-1;
     }
     return index+1;
+  }
+
+  public void printGameBoard(ChessGame game) {
+    printGameBoard(game.getBoard(), myColor);
   }
 }

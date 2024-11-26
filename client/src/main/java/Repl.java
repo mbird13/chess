@@ -9,7 +9,9 @@ public class Repl {
     var scanner = new Scanner(System.in);
     String result = "";
     while(!result.equals("quit")) {
-      client.printPrompt();
+      if (!result.equals("join")) {
+        client.printPrompt();
+      }
       String line = scanner.nextLine();
 
       try {

@@ -15,6 +15,7 @@ import service.GameService;
 import service.ServiceHandler;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
@@ -65,6 +66,10 @@ public class WebSocketHandler {
       String message=String.format("%s has joined the game.", authData.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
       connectionHandler.add(command.getGameID(), authData.username(), session);
+
+      var gameData = dataAccess.getGame(String.valueOf(command.getGameID()));
+      var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
+      connectionHandler.loadGame(loadGameMessage, command.getGameID(), authData.username());
     } catch (IOException e) {
       throw new ResponseException(500, "Unable to join game");
     }

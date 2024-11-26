@@ -3,6 +3,7 @@ package server;
 import service.ServiceHandler;
 import spark.*;
 import exception.ResponseException;
+import websocket.WebSocketHandler;
 
 
 public class Server {

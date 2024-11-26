@@ -6,9 +6,12 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import exception.ResponseException;
 import jdk.jshell.spi.ExecutionControl;
+import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import service.GameService;
 import service.ServiceHandler;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -16,6 +19,7 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @WebSocket
 public class WebSocketHandler {
@@ -23,7 +27,7 @@ public class WebSocketHandler {
   private final ConnectionHandler connectionHandler;
   private final DataAccess dataAccess;
 
-  public WebSocketHandler(ServiceHandler chessHandler) {
+  public WebSocketHandler() {
     DataAccess dataAccess1;
     try {
       dataAccess1 = new SqlDataAccess();
@@ -35,7 +39,7 @@ public class WebSocketHandler {
   }
 
   @OnWebSocketMessage
-  private void onMessage(Session session, String message) throws ResponseException {
+  public void onMessage(Session session, String message) throws ResponseException {
     UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
     MakeMoveCommand moveCommand = null;
     if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
@@ -68,15 +72,44 @@ public class WebSocketHandler {
 
   private void leave(UserGameCommand command) throws ResponseException {
     try {
-      var authData=dataAccess.getAuth(command.getAuthToken());
-      connectionHandler.remove(command.getGameID(), authData.username());
-      String message=String.format("%s has left the game.", authData.username());
+      verifyAuthToken(command.getAuthToken());
+      var user= dataAccess.getAuth(command.getAuthToken());
+
+      GameData oldGameData;
+      try {
+        oldGameData = dataAccess.getGame(String.valueOf(command.getGameID()));
+      } catch (ResponseException e) {
+        throw new ResponseException(400, "Error: bad request");
+      }
+      if (oldGameData == null) {
+        throw new ResponseException(400, "Error: bad request");
+      }
+      GameData newGameData;
+      if (Objects.equals(oldGameData.whiteUsername(), user.username())) {
+        newGameData = new GameData(oldGameData.gameID(),
+                null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+      } else if (Objects.equals(oldGameData.blackUsername(), user.username())) {
+        newGameData = new GameData(oldGameData.gameID(),
+                oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
+      } else {
+        throw new ResponseException(400, "Error: bad request");
+      }
+
+      dataAccess.updateGame(String.valueOf(command.getGameID()), newGameData);
+
+      connectionHandler.remove(command.getGameID(), user.username());
+      String message=String.format("%s has left the game.", user.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
     } catch (IOException e) {
       throw new ResponseException(500, "Unable to join game");
     }
   }
 
-
+  private void verifyAuthToken(String token) throws ResponseException {
+    AuthData authData = dataAccess.getAuth(token);
+    if (authData == null) {
+      throw new ResponseException(401, "Error: unauthorized");
+    }
+  }
 
 }

@@ -13,7 +13,7 @@ public class Server {
 
     public Server() {
         chessService = new ServiceHandler();
-        webSocketHandler = new WebSocketHandler(chessService);
+        webSocketHandler = new WebSocketHandler();
     }
 
     public int run(int desiredPort) {

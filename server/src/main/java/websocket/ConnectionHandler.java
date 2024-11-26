@@ -12,7 +12,7 @@ import websocket.messages.NotificationMessage;
 
 public class ConnectionHandler {
 
-  private HashMap<Integer, ArrayList<Connection>> connections;
+  private final HashMap<Integer, ArrayList<Connection>> connections = new HashMap<>();
 
   public void add(Integer gameId, String username, Session session) {
     var currentConnections = connections.getOrDefault(gameId, new ArrayList<>());
@@ -27,7 +27,7 @@ public class ConnectionHandler {
   }
 
   public void notification(NotificationMessage message, Integer gameID) throws IOException {
-    var usersToNotify = connections.get(gameID);
+    var usersToNotify = connections.getOrDefault(gameID, new ArrayList<>());
     for (var user : usersToNotify) {
       if (user.session.isOpen()) {
         user.send(new Gson().toJson(message));

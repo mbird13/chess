@@ -14,6 +14,7 @@ public class Client {
   private String authToken = null;
   private Map<Integer, GameListElement> gameList = null;
   private String currentGameId = null;
+  private WebSocketFacade webSocketFacade = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -68,7 +69,7 @@ public class Client {
 
   private String leaveGame() {
     try {
-      //add leave game websocket call
+      webSocketFacade.leaveGame(authToken, currentGameId);
       System.out.println("You have left the game.");
       state = State.LoggedIn;
     } catch (Exception exception) {
@@ -91,6 +92,8 @@ public class Client {
     try {
       var joinRequest = parseJoinParams(params);
       server.joinGame(joinRequest);
+      webSocketFacade = new WebSocketFacade("http://localhost:8080", this);
+      webSocketFacade.joinGame(joinRequest);
       state=State.InGame;
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
       printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
@@ -185,11 +188,15 @@ public class Client {
     return "";
   }
 
-  private String printErrorMessage(String message) {
+  public String printErrorMessage(String message) {
     System.out.println(
             EscapeSequences.SET_TEXT_COLOR_RED + message
                     + EscapeSequences.RESET_TEXT_COLOR + "\n");
     return "";
+  }
+
+  public void printStatusMessage(String message) {
+    System.out.println("\n\n" + message);
   }
 
   private String register(String[] params) {
@@ -298,11 +305,11 @@ public class Client {
     }
     else {throw new Exception("Invalid team color");}
 
-    currentGameId = params[0];
+    currentGameId = gameList.get(joinId).gameID();
     return new JoinGameRequest(authToken, joinColor, gameList.get(joinId).gameID());
   }
 
-  private void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
+  public void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {
     var bottomColorPositions = board.getPositions(bottomColor);
     var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
     String[] rowLabels = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};

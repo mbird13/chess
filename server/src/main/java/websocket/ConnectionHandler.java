@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import com.google.gson.Gson;
-import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
@@ -39,10 +39,8 @@ public class ConnectionHandler {
     }
   }
 
-  public void notification(NotificationMessage message, Session session) throws IOException {
-    if (session.isOpen()) {
-      session.getRemote().sendString(new Gson().toJson(message));
-    }
+  public void errorMessage(ErrorMessage message, Session session) throws IOException {
+    session.getRemote().sendString(new Gson().toJson(message));
   }
 
   public void loadGame(LoadGameMessage message, Session session) throws IOException {

@@ -5,17 +5,14 @@ import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import exception.ResponseException;
-import jdk.jshell.spi.ExecutionControl;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.slf4j.helpers.NOPLogger;
-import service.GameService;
-import service.ServiceHandler;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -63,6 +60,8 @@ public class WebSocketHandler {
 
   private void connect(Session session, UserGameCommand command) throws IOException {
     try {
+      verifyAuthToken(command.getAuthToken());
+      verifyGame(command.getGameID());
       var authData= dataAccess.getAuth(command.getAuthToken());
       String message=String.format("%s has joined the game.", authData.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
@@ -72,9 +71,9 @@ public class WebSocketHandler {
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
       connectionHandler.loadGame(loadGameMessage, session);
     } catch (IOException | ResponseException e) {
-      NotificationMessage errorMessage =
-              new NotificationMessage(ServerMessage.ServerMessageType.ERROR, "Error: Unable to join game.");
-      connectionHandler.notification(errorMessage, session);
+      ErrorMessage errorMessage =
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Unable to join game.");
+      connectionHandler.errorMessage(errorMessage, session);
     }
   }
 
@@ -117,6 +116,13 @@ public class WebSocketHandler {
     AuthData authData = dataAccess.getAuth(token);
     if (authData == null) {
       throw new ResponseException(401, "Error: unauthorized");
+    }
+  }
+
+  private void verifyGame(Integer gameID) throws ResponseException {
+    GameData gameData = dataAccess.getGame(String.valueOf(gameID));
+    if (gameData == null) {
+      throw new ResponseException(401, "Error: game doesn't exist");
     }
   }
 

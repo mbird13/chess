@@ -11,6 +11,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.slf4j.helpers.NOPLogger;
 import service.GameService;
 import service.ServiceHandler;
 import websocket.commands.MakeMoveCommand;
@@ -40,7 +41,7 @@ public class WebSocketHandler {
   }
 
   @OnWebSocketMessage
-  public void onMessage(Session session, String message) throws ResponseException {
+  public void onMessage(Session session, String message) throws ResponseException, IOException {
     UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
     MakeMoveCommand moveCommand = null;
     if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
@@ -60,18 +61,20 @@ public class WebSocketHandler {
   private void makeMove(MakeMoveCommand moveCommand) {
   }
 
-  private void connect(Session session, UserGameCommand command) throws ResponseException {
+  private void connect(Session session, UserGameCommand command) throws IOException {
     try {
-      var authData=dataAccess.getAuth(command.getAuthToken());
+      var authData= dataAccess.getAuth(command.getAuthToken());
       String message=String.format("%s has joined the game.", authData.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
       connectionHandler.add(command.getGameID(), authData.username(), session);
 
       var gameData = dataAccess.getGame(String.valueOf(command.getGameID()));
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
-      connectionHandler.loadGame(loadGameMessage, command.getGameID(), authData.username());
-    } catch (IOException e) {
-      throw new ResponseException(500, "Unable to join game");
+      connectionHandler.loadGame(loadGameMessage, session);
+    } catch (IOException | ResponseException e) {
+      NotificationMessage errorMessage =
+              new NotificationMessage(ServerMessage.ServerMessageType.ERROR, "Error: Unable to join game.");
+      connectionHandler.notification(errorMessage, session);
     }
   }
 
@@ -106,7 +109,7 @@ public class WebSocketHandler {
       String message=String.format("%s has left the game.", user.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
     } catch (IOException e) {
-      throw new ResponseException(500, "Unable to join game");
+      throw new ResponseException(500, "Unable to leave game");
     }
   }
 

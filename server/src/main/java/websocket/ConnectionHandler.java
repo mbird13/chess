@@ -39,17 +39,15 @@ public class ConnectionHandler {
     }
   }
 
-  public void loadGame(LoadGameMessage message, Integer gameID, String username) throws IOException {
-    var users = connections.getOrDefault(gameID, new ArrayList<>());
-    for (var user : users) {
-      if (user.session.isOpen()) {
-        if (user.username.equals(username)) {
-          user.send(new Gson().toJson(message));
-        }
-      }
-      else {
-        remove(gameID, user.username);
-      }
+  public void notification(NotificationMessage message, Session session) throws IOException {
+    if (session.isOpen()) {
+      session.getRemote().sendString(new Gson().toJson(message));
+    }
+  }
+
+  public void loadGame(LoadGameMessage message, Session session) throws IOException {
+    if (session.isOpen()) {
+      session.getRemote().sendString(new Gson().toJson(message));
     }
   }
 }

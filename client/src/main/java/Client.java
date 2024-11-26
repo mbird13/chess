@@ -99,11 +99,14 @@ public class Client {
       myColor = joinRequest.playerColor();
     } catch (NumberFormatException e) {
         printErrorMessage("Invalid game number, please verify input.");
+        return "";
       } catch (ResponseException e) {
-      printErrorMessage("That color is already taken.");
+        printErrorMessage("That color is already taken.");
+        return "";
     }
     catch (Exception exception) {
         printErrorMessage(exception.getMessage());
+        return "";
       }
     return "join";
   }

@@ -28,7 +28,7 @@ public class NotificationHandler {
 
   private void loadGame(String message) {
     var loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-    client.printStatusMessage("");
+    client.printStatusMessage("Welcome!\n");
     client.printGameBoard(loadGameMessage.game);
     client.printPrompt();
   }

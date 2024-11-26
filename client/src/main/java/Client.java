@@ -113,7 +113,7 @@ public class Client {
       }
       if (gameList == null) {
         gameList=new HashMap<>();
-        ArrayList<GameListElement> response=null;
+        ArrayList<GameListElement> response;
         response=server.listGames(new ListGamesRequest(authToken)).games;
 
         for (int i=0; i < response.size(); i++) {
@@ -172,6 +172,7 @@ public class Client {
     }
     try {
       server.createGame(new CreateGameRequest(authToken, params[0]));
+      System.out.println("New game was created. List games to see it.");
     } catch (ResponseException e) {
       printErrorMessage(e.getMessage());
     }
@@ -250,7 +251,7 @@ public class Client {
         System.out.println("Resign the game: 'resign'");
         System.out.println("See instructions: 'help'");
       }
-    };
+    }
     return "";
   }
 
@@ -268,7 +269,7 @@ public class Client {
         System.out.println("\n");
         System.out.print("Make a move:");
       }
-    };
+    }
   }
 
   private JoinGameRequest parseJoinParams(String[] params) throws Exception {
@@ -310,8 +311,7 @@ public class Client {
     int rowFinalIndex = 8;
     int colStartingIndex = 7;
     int colFinalIndex = -1;
-    int rowOffset = 1;
-    int colOffset = 0;
+    int offset = 1;
     int bgColor = 0;
     if (bottomColor == ChessGame.TeamColor.WHITE) {
       //rowLabels =new String[] {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
@@ -327,8 +327,8 @@ public class Client {
       printRowLabels(rowLabels, row);
       for (int col = colStartingIndex; iterationCheck(col, colFinalIndex);) {
         bgColor = setBgColor(bgColor);
-        var topIndex = topColorPositions.indexOf(new ChessPosition(row + rowOffset, col + rowOffset));
-        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + rowOffset, col + rowOffset));
+        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
         if (topIndex != -1) {
           setTopColor(bottomColor);
           System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
@@ -348,7 +348,7 @@ public class Client {
       row = iterate(rowFinalIndex, row);
     }
     printColLabels(colLabels);
-    System.out.println("");
+    System.out.println();
   }
 
   private void printRowLabels(String[] labels, int row) {

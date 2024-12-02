@@ -20,7 +20,7 @@ public class Client {
 
   public String eval(String input) {
     var tokens = input.toLowerCase().split(" ");
-    var cmd = (tokens.length > 0) ? tokens[0] : "help";
+    var cmd = (tokens.length > 0) ? tokens[0] : "no";
     var params = Arrays.copyOfRange(tokens, 1, tokens.length);
     return switch (state) {
       case LoggedOut -> loggedOutMenu(cmd, params);
@@ -67,9 +67,13 @@ public class Client {
       return "";
     }
     try {
+      if (currentGame.isGameOver()) {
+        printErrorMessage("The game is over");
+        return "";
+      }
       if (currentGame.getTeamTurn() == myColor) {
         currentGame.makeMove(move);
-        webSocketFacade.makeMove(authToken, move, currentGameId, myColor);
+        webSocketFacade.makeMove(authToken, move, currentGameId);
       }
       else {
         printErrorMessage("It is not your turn.");
@@ -146,12 +150,26 @@ public class Client {
   }
 
   private String resignGame() {
-    printErrorMessage("NOT IMPLEMENTED");
-    return "";
-  }
+    if (currentGame.getTeamTurn() != myColor) {
+      printErrorMessage("It is not your turn.");
+      return "";
+    }
+    try {
+      System.out.println("\n" + "Are you sure you want to resign the game?");
+      var scanner = new Scanner(System.in);
+      String line = scanner.nextLine();
 
-  private String repeatLastMove() {
-    printErrorMessage("NOT IMPLEMENTED");
+      var tokens = line.toLowerCase().split(" ");
+      var cmd = (tokens.length > 0) ? tokens[0] : "no";
+
+      if (!cmd.equals("yes")) {
+        return "";
+      }
+      webSocketFacade.resign(authToken, currentGameId);
+    } catch (ResponseException e) {
+      printErrorMessage("Unable to resign");
+    }
+
     return "";
   }
 

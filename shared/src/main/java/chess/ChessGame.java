@@ -15,6 +15,25 @@ public class ChessGame {
 
     ChessBoard board = new ChessBoard();
     TeamColor teamTurn;
+    boolean gameOver = false;
+
+    public TeamColor getWinner() {
+        return winner;
+    }
+
+    public void setWinner(TeamColor winner) {
+        this.winner=winner;
+    }
+
+    TeamColor winner = null;
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver=gameOver;
+    }
 
     public ChessGame() {
         board.resetBoard();

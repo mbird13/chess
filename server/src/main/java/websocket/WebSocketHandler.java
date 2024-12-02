@@ -52,11 +52,37 @@ public class WebSocketHandler {
       case CONNECT -> connect(session, command);
       case LEAVE -> leave(command);
       case MAKE_MOVE -> makeMove(session, moveCommand);
-      case RESIGN -> resign(command);
+      case RESIGN -> resign(session, command);
     }
   }
 
-  private void resign(UserGameCommand command) {
+  private void resign(Session session, UserGameCommand command) throws IOException {
+    try {
+      verifyAuthToken(command.getAuthToken());
+      verifyGame(command.getGameID());
+      var gameData=dataAccess.getGame(String.valueOf(command.getGameID()));
+      var game=gameData.game();
+      var authData=dataAccess.getAuth(command.getAuthToken());
+
+      if (!(authData.username().equals(gameData.whiteUsername()) || authData.username().equals(gameData.blackUsername()))) {
+        throw new ResponseException(500, "Unable to resign game as an observer");
+      }
+      var userColor=(Objects.equals(authData.username(), gameData.whiteUsername()))
+              ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+
+      game.setGameOver(true);
+      game.setWinner(userColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+      var newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+      dataAccess.updateGame(newGameData.gameID(), newGameData);
+
+      var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              authData.username() + " has resigned the game");
+      connectionHandler.notification(notification, command.getGameID());
+
+    } catch (ResponseException e) {
+      ErrorMessage errorMessage =
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+      connectionHandler.errorMessage(errorMessage, session);    }
   }
 
   private void makeMove(Session session, MakeMoveCommand moveCommand) throws IOException {
@@ -66,11 +92,15 @@ public class WebSocketHandler {
       var gameData = dataAccess.getGame(String.valueOf(moveCommand.getGameID()));
       var game = gameData.game();
       var authData = dataAccess.getAuth(moveCommand.getAuthToken());
+      if (!(authData.username().equals(gameData.whiteUsername()) || authData.username().equals(gameData.blackUsername()))) {
+        throw new ResponseException(500, "Unable to resign game as an observer");
+      }
       var userColor =(Objects.equals(authData.username(), gameData.whiteUsername()))
               ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
       if (userColor != game.getTeamTurn()) {
         throw new ResponseException(500, "It is not your turn");
       }
+
       game.makeMove(moveCommand.getMove());
       var newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
       dataAccess.updateGame(newGameData.gameID(), newGameData);
@@ -166,7 +196,10 @@ public class WebSocketHandler {
   private void verifyGame(Integer gameID) throws ResponseException {
     GameData gameData = dataAccess.getGame(String.valueOf(gameID));
     if (gameData == null) {
-      throw new ResponseException(401, "Error: game doesn't exist");
+      throw new ResponseException(401, "Game doesn't exist");
+    }
+    if (gameData.game().isGameOver()) {
+      throw new ResponseException(401, "The game is over");
     }
   }
 

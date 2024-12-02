@@ -26,12 +26,28 @@ public class Client {
       case LoggedOut -> loggedOutMenu(cmd, params);
       case LoggedIn -> loggedInMenu(cmd, params);
       case InGame -> gameMenu(cmd, params);
+      case Observer -> observerMenu(cmd, params);
     };
+  }
+
+  private String observerMenu(String cmd, String[] params) {
+    return switch (cmd) {
+      case "board" -> redraw();
+      case "leave" -> leaveGame();
+      case "help" -> help();
+      default -> invalidInput("");
+    };
+  }
+
+  private String redraw() {
+    printGameBoard(currentGame.getBoard(), myColor);
+    return "";
   }
 
   private String gameMenu(String cmd, String[] params) {
     return switch (cmd) {
       case "move" -> makeMove(params);
+      case "board" -> redraw();
       case "leave" -> leaveGame();
       case "resign" -> resignGame();
       case "help" -> help();
@@ -214,9 +230,13 @@ public class Client {
       if (joinId < 1 | joinId > gameList.size()) {
         throw new Exception("Invalid game number. Please verify information.");
       }
+      JoinGameRequest request = new JoinGameRequest(authToken, null, gameList.get(joinId).gameID());
+      webSocketFacade = new WebSocketFacade("http://localhost:8080", this);
+      webSocketFacade.joinGame(request);
+      state = State.Observer;
+      myColor = ChessGame.TeamColor.WHITE;
+      currentGameId = request.gameID();
 
-      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.BLACK);
-      printGameBoard(new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
     } catch (Exception e) {
       printErrorMessage("Invalid game number. Please verify information.");
     }
@@ -341,8 +361,15 @@ public class Client {
       case InGame -> {
         System.out.println("Instructions for playing a game:");
         System.out.println("Make a move during your turn: 'move' <STARTING POSITION> <FINAL POSITION>");
+        System.out.println("Redraw the current board: 'board'");
         System.out.println("Leave Game: 'leave' ");
         System.out.println("Resign the game: 'resign'");
+        System.out.println("See instructions: 'help'");
+      }
+      case Observer -> {
+        System.out.println("Options:");
+        System.out.println("Redraw the current board: 'board'");
+        System.out.println("Leave Game: 'leave' ");
         System.out.println("See instructions: 'help'");
       }
     }
@@ -352,16 +379,20 @@ public class Client {
   public void printPrompt() {
     switch (state) {
       case LoggedOut -> {
-        System.out.print("\nInput Command:");
+        System.out.print("\nInput Command: ");
       }
       case LoggedIn -> {
         System.out.println("\nLogged in");
-        System.out.print("Input Command:");
+        System.out.print("Input Command: ");
 
       }
       case InGame -> {
         System.out.println("\n");
-        System.out.print("Make a move:");
+        System.out.print("Make a move: ");
+      }
+      case Observer -> {
+        System.out.println("\nObserving game");
+        System.out.print("Input Command: ");
       }
     }
   }

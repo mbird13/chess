@@ -1,5 +1,6 @@
 public enum State {
   LoggedOut,
   LoggedIn,
-  InGame
+  InGame,
+  Observer
 }

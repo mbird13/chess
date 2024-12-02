@@ -138,7 +138,7 @@ public class WebSocketHandler {
       verifyAuthToken(command.getAuthToken());
       verifyGame(command.getGameID());
       var authData= dataAccess.getAuth(command.getAuthToken());
-      String message=String.format("%s has joined the game.", authData.username());
+      String message=String.format("%s has joined the game as %s", authData.username(), role);
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
       connectionHandler.add(command.getGameID(), authData.username(), session);
 

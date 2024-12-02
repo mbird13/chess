@@ -29,13 +29,34 @@ public class ConnectionHandler {
 
   public void notification(NotificationMessage message, Integer gameID) throws IOException {
     var usersToNotify = connections.getOrDefault(gameID, new ArrayList<>());
+    var removalList = new ArrayList<Connection>();
     for (var user : usersToNotify) {
       if (user.session.isOpen()) {
         user.send(new Gson().toJson(message));
       }
       else {
-        remove(gameID, user.username);
+        removalList.add(user);
       }
+    }
+    for (var user : removalList) {
+      remove(gameID, user.username);
+    }
+  }
+  public void notification(NotificationMessage message, Integer gameID, String currentUser) throws IOException {
+    var usersToNotify = connections.getOrDefault(gameID, new ArrayList<>());
+    var removalList = new ArrayList<Connection>();
+    for (var user : usersToNotify) {
+      if (user.session.isOpen()) {
+        if (!Objects.equals(user.username, currentUser)) {
+          user.send(new Gson().toJson(message));
+        }
+      }
+      else {
+        removalList.add(user);
+      }
+    }
+    for (var user : removalList) {
+      remove(gameID, user.username);
     }
   }
 
@@ -51,12 +72,16 @@ public class ConnectionHandler {
 
   public void loadGame(LoadGameMessage message, Integer gameID) throws IOException {
     var usersToNotify= connections.getOrDefault(gameID, new ArrayList<>());
+    var removalList = new ArrayList<Connection>();
     for (var user : usersToNotify) {
       if (user.session.isOpen()) {
-        user.session.getRemote().sendString(new Gson().toJson(message));
+          user.send(new Gson().toJson(message));
       } else {
-        remove(gameID, user.username);
+        removalList.add(user);
       }
+    }
+    for (var user : removalList) {
+      remove(gameID, user.username);
     }
   }
 }

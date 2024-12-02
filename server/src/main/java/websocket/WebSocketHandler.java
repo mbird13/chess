@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
@@ -64,15 +65,20 @@ public class WebSocketHandler {
       verifyGame(moveCommand.getGameID());
       var gameData = dataAccess.getGame(String.valueOf(moveCommand.getGameID()));
       var game = gameData.game();
+      var authData = dataAccess.getAuth(moveCommand.getAuthToken());
+      var userColor =(Objects.equals(authData.username(), gameData.whiteUsername()))
+              ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+      if (userColor != game.getTeamTurn()) {
+        throw new ResponseException(500, "It is not your turn");
+      }
       game.makeMove(moveCommand.getMove());
       var newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
       dataAccess.updateGame(newGameData.gameID(), newGameData);
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newGameData.game());
       connectionHandler.loadGame(loadGameMessage, Integer.valueOf(newGameData.gameID()));
-      var authData = dataAccess.getAuth(moveCommand.getAuthToken());
       var moveMadeMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
               authData.username() + " moved " + moveToString(moveCommand.getMove()));
-      connectionHandler.notification(moveMadeMessage, moveCommand.getGameID());
+      connectionHandler.notification(moveMadeMessage, moveCommand.getGameID(), authData.username());
     } catch (ResponseException e) {
       ErrorMessage errorMessage =
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());

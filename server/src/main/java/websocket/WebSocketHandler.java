@@ -1,5 +1,7 @@
 package websocket;
 
+import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
@@ -67,7 +69,10 @@ public class WebSocketHandler {
       dataAccess.updateGame(newGameData.gameID(), newGameData);
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newGameData.game());
       connectionHandler.loadGame(loadGameMessage, Integer.valueOf(newGameData.gameID()));
-      //var moveMadeMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "username made a move");
+      var authData = dataAccess.getAuth(moveCommand.getAuthToken());
+      var moveMadeMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              authData.username() + " moved " + moveToString(moveCommand.getMove()));
+      connectionHandler.notification(moveMadeMessage, moveCommand.getGameID());
     } catch (ResponseException e) {
       ErrorMessage errorMessage =
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
@@ -77,6 +82,19 @@ public class WebSocketHandler {
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
       connectionHandler.errorMessage(errorMessage, session);
     }
+  }
+
+  private String moveToString(ChessMove move) {
+    var start = getPositionFromInput(move.getStartPosition());
+    var end = getPositionFromInput(move.getEndPosition());
+    return " " + start + " to " + end;
+  }
+
+  private String getPositionFromInput(ChessPosition position) {
+    StringBuilder result = new StringBuilder();
+    result.append((char) (position.getColumn() + 'a' - 1));
+    result.append(position.getRow());
+    return result.toString();
   }
 
   private void connect(Session session, UserGameCommand command) throws IOException {
@@ -124,10 +142,9 @@ public class WebSocketHandler {
       }
 
       dataAccess.updateGame(String.valueOf(command.getGameID()), newGameData);
-
-      connectionHandler.remove(command.getGameID(), user.username());
       String message=String.format("%s has left the game.", user.username());
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
+      connectionHandler.remove(command.getGameID(), user.username());
     } catch (IOException e) {
       throw new ResponseException(500, "Unable to leave game");
     }

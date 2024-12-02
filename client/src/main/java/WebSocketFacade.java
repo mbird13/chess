@@ -1,7 +1,9 @@
+import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import servicehelpers.JoinGameRequest;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
 import javax.websocket.*;
@@ -58,9 +60,9 @@ public class WebSocketFacade extends Endpoint {
     }
   }
 
-  public void makeMove(String authToken, ChessMove move, String currentGameId) throws ResponseException {
+  public void makeMove(String authToken, ChessMove move, String currentGameId, ChessGame.TeamColor myColor) throws ResponseException {
     try {
-      UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(currentGameId));
+      MakeMoveCommand command = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(currentGameId), move);
       this.session.getBasicRemote().sendText(new Gson().toJson(command));
     } catch (IOException e) {
       throw new ResponseException(500, e.getMessage());

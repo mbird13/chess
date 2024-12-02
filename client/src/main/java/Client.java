@@ -63,11 +63,19 @@ public class Client {
 
   private String makeMove(String[] params) {
     ChessMove move = parseMoveParams(params);
+    if (move == null) {
+      return "";
+    }
     try {
-      currentGame.makeMove(move);
-      webSocketFacade.makeMove(authToken, move, currentGameId);
+      if (currentGame.getTeamTurn() == myColor) {
+        currentGame.makeMove(move);
+        webSocketFacade.makeMove(authToken, move, currentGameId, myColor);
+      }
+      else {
+        printErrorMessage("It is not your turn.");
+      }
     } catch (InvalidMoveException e) {
-      invalidInput("Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
+      printErrorMessage("Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
     } catch (ResponseException e) {
       printErrorMessage(e.getMessage());
     }
@@ -79,10 +87,17 @@ public class Client {
     if (params.length != 2 && params.length != 3) {
       invalidInput("To move a piece: 'move' <STARTING POSITION> <FINAL POSITION>" +
               "\nTo move a piece and promote it: 'move' <STARTING POSITION> <FINAL POSITION> <PROMOTION PIECE>");
+      return null;
     }
     var positions=new ArrayList<ChessPosition>();
     positions.add(getPositionFromInput(params[0]));
+    if (positions.get(0) == null) {
+      return null;
+    }
     positions.add(getPositionFromInput(params[1]));
+    if (positions.get(1) == null) {
+      return null;
+    }
     if (params.length == 2) {
       return new ChessMove(positions.get(0), positions.get(1), null);
     }
@@ -106,13 +121,15 @@ public class Client {
 
   private ChessPosition getPositionFromInput(String param) {
     if (param.length() != 2) {
-      invalidInput("Invalid position");
+      printErrorMessage("Invalid position");
+      return null;
     }
     var move = param.toLowerCase();
     int column = move.charAt(0) - 'a' + 1;
     int row = Integer.parseInt(move.substring(1));
     if (column < 1 || column > 8 || row < 1 || row > 8) {
-      invalidInput("Invalid position: " + param);
+      printErrorMessage("Invalid position: " + param);
+      return null;
     }
     return new ChessPosition(row, column);
   }

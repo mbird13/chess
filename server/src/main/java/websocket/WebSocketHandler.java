@@ -179,8 +179,10 @@ public class WebSocketHandler {
 
       dataAccess.updateGame(String.valueOf(command.getGameID()), newGameData);
       String message=String.format("%s has left the game.", user.username());
-      connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
+      connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message),
+              command.getGameID(), user.username());
       connectionHandler.remove(command.getGameID(), user.username());
+
     } catch (IOException e) {
       throw new ResponseException(500, "Unable to leave game");
     }

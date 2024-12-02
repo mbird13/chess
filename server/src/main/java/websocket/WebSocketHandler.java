@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
@@ -47,7 +48,7 @@ public class WebSocketHandler {
     switch (command.getCommandType()) {
       case CONNECT -> connect(session, command);
       case LEAVE -> leave(command);
-      case MAKE_MOVE -> makeMove(moveCommand);
+      case MAKE_MOVE -> makeMove(session, moveCommand);
       case RESIGN -> resign(command);
     }
   }
@@ -55,7 +56,27 @@ public class WebSocketHandler {
   private void resign(UserGameCommand command) {
   }
 
-  private void makeMove(MakeMoveCommand moveCommand) {
+  private void makeMove(Session session, MakeMoveCommand moveCommand) throws IOException {
+    try {
+      verifyAuthToken(moveCommand.getAuthToken());
+      verifyGame(moveCommand.getGameID());
+      var gameData = dataAccess.getGame(String.valueOf(moveCommand.getGameID()));
+      var game = gameData.game();
+      game.makeMove(moveCommand.getMove());
+      var newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+      dataAccess.updateGame(newGameData.gameID(), newGameData);
+      var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, newGameData.game());
+      connectionHandler.loadGame(loadGameMessage, Integer.valueOf(newGameData.gameID()));
+      //var moveMadeMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "username made a move");
+    } catch (ResponseException e) {
+      ErrorMessage errorMessage =
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+      connectionHandler.errorMessage(errorMessage, session);    }
+    catch (InvalidMoveException e) {
+      ErrorMessage errorMessage =
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
+      connectionHandler.errorMessage(errorMessage, session);
+    }
   }
 
   private void connect(Session session, UserGameCommand command) throws IOException {

@@ -1,3 +1,4 @@
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import servicehelpers.JoinGameRequest;
@@ -53,6 +54,15 @@ public class WebSocketFacade extends Endpoint {
               authToken, Integer.parseInt(currentGameId));
       this.session.getBasicRemote().sendText(new Gson().toJson(command));
     } catch (Exception e) {
+      throw new ResponseException(500, e.getMessage());
+    }
+  }
+
+  public void makeMove(String authToken, ChessMove move, String currentGameId) throws ResponseException {
+    try {
+      UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(currentGameId));
+      this.session.getBasicRemote().sendText(new Gson().toJson(command));
+    } catch (IOException e) {
       throw new ResponseException(500, e.getMessage());
     }
   }

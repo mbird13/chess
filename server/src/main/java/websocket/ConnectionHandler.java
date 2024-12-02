@@ -48,4 +48,15 @@ public class ConnectionHandler {
       session.getRemote().sendString(new Gson().toJson(message));
     }
   }
+
+  public void loadGame(LoadGameMessage message, Integer gameID) throws IOException {
+    var usersToNotify= connections.getOrDefault(gameID, new ArrayList<>());
+    for (var user : usersToNotify) {
+      if (user.session.isOpen()) {
+        user.session.getRemote().sendString(new Gson().toJson(message));
+      } else {
+        remove(gameID, user.username);
+      }
+    }
+  }
 }

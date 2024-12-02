@@ -14,6 +14,7 @@ public class Client {
   private String currentGameId = null;
   private WebSocketFacade webSocketFacade = null;
   private ChessGame.TeamColor myColor = null;
+  private ChessGame currentGame = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -62,6 +63,15 @@ public class Client {
 
   private String makeMove(String[] params) {
     ChessMove move = parseMoveParams(params);
+    try {
+      currentGame.makeMove(move);
+      webSocketFacade.makeMove(authToken, move, currentGameId);
+    } catch (InvalidMoveException e) {
+      invalidInput("Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
+    } catch (ResponseException e) {
+      printErrorMessage(e.getMessage());
+    }
+
     return "";
   }
 
@@ -100,7 +110,7 @@ public class Client {
     }
     var move = param.toLowerCase();
     int column = move.charAt(0) - 'a' + 1;
-    int row = move.charAt(1);
+    int row = Integer.parseInt(move.substring(1));
     if (column < 1 || column > 8 || row < 1 || row > 8) {
       invalidInput("Invalid position: " + param);
     }
@@ -458,5 +468,9 @@ public class Client {
 
   public void printGameBoard(ChessGame game) {
     printGameBoard(game.getBoard(), myColor);
+  }
+
+  public void setGame(ChessGame game) {
+    this.currentGame = game;
   }
 }

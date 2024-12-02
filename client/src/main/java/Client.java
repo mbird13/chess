@@ -1,9 +1,7 @@
 import java.util.*;
 
+import chess.*;
 import serverfacade.ServerFacade;
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPosition;
 import exception.ResponseException;
 import servicehelpers.*;
 import ui.EscapeSequences;
@@ -35,7 +33,6 @@ public class Client {
       case "move" -> makeMove(params);
       case "leave" -> leaveGame();
       case "resign" -> resignGame();
-      case "repeat" -> repeatLastMove();
       case "help" -> help();
       default -> invalidInput("");
     };
@@ -64,8 +61,50 @@ public class Client {
   }
 
   private String makeMove(String[] params) {
-    printErrorMessage("NOT IMPLEMENTED");
+    ChessMove move = parseMoveParams(params);
     return "";
+  }
+
+  private ChessMove parseMoveParams(String[] params) {
+    if (params.length != 2 && params.length != 3) {
+      invalidInput("To move a piece: 'move' <STARTING POSITION> <FINAL POSITION>" +
+              "\nTo move a piece and promote it: 'move' <STARTING POSITION> <FINAL POSITION> <PROMOTION PIECE>");
+    }
+    var positions=new ArrayList<ChessPosition>();
+    positions.add(getPositionFromInput(params[0]));
+    positions.add(getPositionFromInput(params[1]));
+    if (params.length == 2) {
+      return new ChessMove(positions.get(0), positions.get(1), null);
+    }
+    return new ChessMove(positions.get(0), positions.get(1), getPromotionPieceFromInput(params[2]));
+  }
+
+  private ChessPiece.PieceType getPromotionPieceFromInput(String param) {
+    var pieceInput = param.toLowerCase();
+    var promotionPiece = switch (pieceInput) {
+      case "queen" -> ChessPiece.PieceType.QUEEN;
+      case "bishop" -> ChessPiece.PieceType.BISHOP;
+      case "rook" -> ChessPiece.PieceType.ROOK;
+      case "knight" -> ChessPiece.PieceType.KNIGHT;
+      default -> null;
+    };
+    if (promotionPiece == null) {
+      invalidInput("Invalid promotion piece: " + param);
+    }
+    return promotionPiece;
+  }
+
+  private ChessPosition getPositionFromInput(String param) {
+    if (param.length() != 2) {
+      invalidInput("Invalid position");
+    }
+    var move = param.toLowerCase();
+    int column = move.charAt(0) - 'a' + 1;
+    int row = move.charAt(1);
+    if (column < 1 || column > 8 || row < 1 || row > 8) {
+      invalidInput("Invalid position: " + param);
+    }
+    return new ChessPosition(row, column);
   }
 
   private String leaveGame() {

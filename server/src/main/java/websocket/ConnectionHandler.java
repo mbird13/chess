@@ -71,9 +71,9 @@ public class ConnectionHandler {
   }
 
   public void loadGame(LoadGameMessage message, Integer gameID) throws IOException {
-    var usersToNotify= connections.getOrDefault(gameID, new ArrayList<>());
+    var users= connections.getOrDefault(gameID, new ArrayList<>());
     var removalList = new ArrayList<Connection>();
-    for (var user : usersToNotify) {
+    for (var user : users) {
       if (user.session.isOpen()) {
           user.send(new Gson().toJson(message));
       } else {

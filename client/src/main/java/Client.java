@@ -35,6 +35,7 @@ public class Client {
     return switch (cmd) {
       case "board" -> redraw();
       case "leave" -> leaveGame();
+      case "highlight" -> highlightMoves(params);
       case "help" -> help();
       default -> invalidInput("");
     };
@@ -49,6 +50,7 @@ public class Client {
     return switch (cmd) {
       case "move" -> makeMove(params);
       case "board" -> redraw();
+      case "highlight" -> highlightMoves(params);
       case "leave" -> leaveGame();
       case "resign" -> resignGame();
       case "help" -> help();
@@ -271,6 +273,7 @@ public class Client {
       server.logout(new LogoutRequest(authToken));
       state = State.LoggedOut;
       authToken = null;
+      myUsername = null;
       System.out.println("You have logged out");
     } catch (ResponseException exception) {
       printErrorMessage(exception.getMessage());
@@ -448,6 +451,91 @@ public class Client {
 
     currentGameId = gameList.get(joinId).gameID();
     return new JoinGameRequest(authToken, joinColor, gameList.get(joinId).gameID());
+  }
+
+  private String highlightMoves(String[] params) {
+    if (params.length != 1) {
+      invalidInput("To highlight valid moves type 'highlight' <START POSITION>");
+    }
+    var position = getPositionFromInput(params[0]);
+    var moves = currentGame.validMoves(position);
+
+    printGameBoard(currentGame.getBoard(), myColor, moves);
+    return "";
+  }
+
+  private void printGameBoard(ChessBoard board, ChessGame.TeamColor myColor, Collection<ChessMove> moves) {
+    var bottomColorPositions = board.getPositions(myColor);
+    var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
+    String[] rowLabels = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+    String colLabels ="    h  g  f  e  d  c  b  a    ";
+    int rowStartingIndex = 0;
+    int rowFinalIndex = 8;
+    int colStartingIndex = 7;
+    int colFinalIndex = -1;
+    int offset = 1;
+    int bgColor = 0;
+    if (myColor == ChessGame.TeamColor.WHITE) {
+      //rowLabels =new String[] {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+      colLabels ="    a  b  c  d  e  f  g  h    ";
+      topColorPositions = board.getPositions(ChessGame.TeamColor.BLACK);
+      rowStartingIndex = 7;
+      rowFinalIndex = -1;
+      colStartingIndex = 0;
+      colFinalIndex = 8;
+    }
+    printColLabels(colLabels);
+    for (int row = rowStartingIndex; iterationCheck(row, rowFinalIndex);) {
+      printRowLabels(rowLabels, row);
+      for (int col = colStartingIndex; iterationCheck(col, colFinalIndex);) {
+        bgColor = setBgColor(bgColor, moves, row, col);
+        var topIndex = topColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        var bottomIndex = bottomColorPositions.indexOf(new ChessPosition(row + offset, col + offset));
+        if (topIndex != -1) {
+          setTopColor(myColor);
+          System.out.print(" " + board.getPiece(topColorPositions.get(topIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        } else if (bottomIndex != -1) {
+          setBottomColor(myColor);
+          System.out.print(" " + board.getPiece(bottomColorPositions.get(bottomIndex)) + " ");
+          System.out.print(EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_TEXT_BOLD_FAINT);
+        } else {
+          System.out.print("   ");
+        }
+        col = iterate(colFinalIndex, col);
+      }
+      printRowLabels(rowLabels, row);
+      System.out.println();
+      bgColor++;
+      row = iterate(rowFinalIndex, row);
+    }
+    printColLabels(colLabels);
+    System.out.println();
+  }
+
+  private int setBgColor(int bgColor, Collection<ChessMove> moves, int row, int col) {
+    boolean isHighlighted = false;
+    for (var move : moves) {
+      if (move.getEndPosition().getRow() == row + 1 && move.getEndPosition().getColumn() == col + 1) {
+        isHighlighted=true;
+        break;
+      }
+    }
+    if (bgColor % 2 == 0) {
+      if (isHighlighted) {
+        System.out.print("\u001B[48;2;250;120;55m");
+      } else {
+        System.out.print("\u001B[48;2;184;160;75m");
+      }
+    }
+    else {
+      if (isHighlighted) {
+        System.out.print("\u001B[48;2;250;63;0m");
+      } else {
+        System.out.print("\u001B[48;2;156;123;9m");
+      }
+    }
+    return bgColor+1;
   }
 
   public void printGameBoard(ChessBoard board, ChessGame.TeamColor bottomColor) {

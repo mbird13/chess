@@ -103,10 +103,9 @@ public class ChessGame {
                 if (isInCheck(myPiece.getTeamColor())) {
                     invalidMoves.add(move);
                 }
-                board.makeMove(new ChessMove(move.getEndPosition(), move.getStartPosition(), null));
-                if (capturedPiece != null) {
-                    board.addPiece(capturedPiecePosition, capturedPiece);
-                }
+                board.addPiece(startPosition, myPiece);
+                board.addPiece(move.getEndPosition(), null);
+                board.addPiece(capturedPiecePosition, capturedPiece);
             }
             else {
                 boolean isInvalid = isInCheck(myPiece.getTeamColor());

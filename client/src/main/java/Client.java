@@ -1,4 +1,3 @@
-import java.nio.channels.ScatteringByteChannel;
 import java.util.*;
 
 import chess.*;
@@ -8,6 +7,10 @@ import servicehelpers.*;
 import ui.EscapeSequences;
 
 public class Client {
+
+  public State getState() {
+    return state;
+  }
 
   private State state = State.LoggedOut;
   private String authToken = null;
@@ -172,13 +175,19 @@ public class Client {
 
   private String leaveGame() {
     try {
+      state = State.LoggedIn;
       webSocketFacade.leaveGame(authToken, currentGameId);
       System.out.println("You have left the game.");
-      state = State.LoggedIn;
     } catch (Exception exception) {
       System.out.println(exception.getMessage());
     }
     return "";
+  }
+
+  public void leaveGameOnError() {
+    state = State.LoggedIn;
+    printErrorMessage("Error with connection. Rejoin game to continue.");
+    printPrompt();
   }
 
   private String resignGame() {
@@ -400,7 +409,9 @@ public class Client {
       case InGame -> {
         System.out.println("Instructions for playing a game:");
         System.out.println("Make a move during your turn: 'move' <STARTING POSITION> <FINAL POSITION>");
+        System.out.println("To promote a pawn: 'move' <STARTING POSITION> <FINAL POSITION> <PROMOTION PIECE>");
         System.out.println("Redraw the current board: 'board'");
+        System.out.println("Highlight valid moves: 'highlight' <START POSITION>");
         System.out.println("Leave Game: 'leave' ");
         System.out.println("Resign the game: 'resign'");
         System.out.println("See instructions: 'help'");
@@ -474,6 +485,12 @@ public class Client {
     var moves = currentGame.validMoves(position);
 
     boardPrinter.printGameBoard(currentGame.getBoard(), myColor, moves);
+    if (moves == null) {
+      printStatusMessage("Selected position is empty.");
+    }
+    else if (moves.isEmpty()) {
+      printStatusMessage("There are no valid moves available for that piece.");
+    }
     return "";
   }
 

@@ -15,6 +15,9 @@ public class BoardPrinter {
   }
 
   public void printGameBoard(ChessBoard board, ChessGame.TeamColor myColor, Collection<ChessMove> moves) {
+    if (moves == null) {
+      moves = new ArrayList<>();
+    }
     var bottomColorPositions = board.getPositions(myColor);
     var topColorPositions = board.getPositions(ChessGame.TeamColor.WHITE);
     String[] rowLabels = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};

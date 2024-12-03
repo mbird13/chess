@@ -17,7 +17,7 @@ public class Repl {
       try {
         result = client.eval(line);
       } catch (Exception exception) {
-          System.out.println("caught exception in REPL: " + exception.getMessage());
+          System.out.println("Error, please try again" );
       }
     }
   }

@@ -3,10 +3,13 @@ package websocket;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.slf4j.helpers.FormattingTuple;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -83,5 +86,17 @@ public class ConnectionHandler {
     for (var user : removalList) {
       remove(gameID, user.username);
     }
+  }
+
+  public Map<Integer, String> remove(Session session) {
+    for (Map.Entry<Integer, ArrayList<Connection>> entry : connections.entrySet()) {
+      for (var connection : entry.getValue()) {
+        remove(entry.getKey(), connection.username);
+        var result = new HashMap<Integer, String>();
+        result.put(entry.getKey(), connection.username);
+        return result;
+      }
+    }
+    return null;
   }
 }

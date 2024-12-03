@@ -40,4 +40,10 @@ public class NotificationHandler {
     client.printStatusMessage(notificationMessage.message);
     client.printPrompt();
   }
+
+  public void onClose() {
+    if (client.getState() == State.InGame){
+      client.leaveGameOnError();
+    }
+  }
 }

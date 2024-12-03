@@ -40,6 +40,12 @@ public class WebSocketFacade extends Endpoint {
   @Override
   public void onOpen(Session session, EndpointConfig endpointConfig) {}
 
+  @Override
+  public void onClose(Session session, CloseReason closeReason) {
+    notificationHandler.onClose();
+  }
+
+
   public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
     try {
       UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT,

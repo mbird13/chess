@@ -12,6 +12,7 @@ import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.MakeMoveCommand;
@@ -55,6 +56,35 @@ public class WebSocketHandler {
       case RESIGN -> resign(session, command);
     }
   }
+
+  @OnWebSocketError
+  public void onError(Session session, Throwable throwable) throws ResponseException {
+    session.close();
+    var result = connectionHandler.remove(session);
+
+    if (result == null) {
+      return;
+    }
+
+    GameData gameData = null;
+    for (var r : result.keySet()) {
+      gameData=dataAccess.getGame(String.valueOf(r));
+    }
+
+    var newGameData = gameData;
+    for (var username : result.values()) {
+      if (gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)) {
+        newGameData = new GameData(gameData.gameID(),
+                null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+      }
+      if (gameData.blackUsername() != null && gameData.blackUsername().equals(username)) {
+        newGameData = new GameData(gameData.gameID(),
+                gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+      }
+    }
+    dataAccess.updateGame(newGameData.gameID(), newGameData);
+  }
+
 
   private void resign(Session session, UserGameCommand command) throws IOException {
     try {

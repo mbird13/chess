@@ -110,7 +110,7 @@ public class WebSocketHandler {
               authData.username() + " moved " + moveToString(moveCommand.getMove()));
       connectionHandler.notification(moveMadeMessage, moveCommand.getGameID(), authData.username());
 
-      checkGameStatus(newGameData, userColor);
+      checkGameStatus(newGameData);
 
     } catch (ResponseException e) {
       ErrorMessage errorMessage =
@@ -123,8 +123,9 @@ public class WebSocketHandler {
     }
   }
 
-  private void checkGameStatus(GameData game, ChessGame.TeamColor userColor) throws ResponseException, IOException {
-    if (game.game().isInStalemate(userColor)) {
+  private void checkGameStatus(GameData game) throws ResponseException, IOException {
+    if (game.game().isInStalemate(ChessGame.TeamColor.WHITE)
+            || game.game().isInStalemate(ChessGame.TeamColor.BLACK)) {
       game.game().setGameOver(true);
       dataAccess.updateGame(game.gameID(), game);
       var stalemateMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,

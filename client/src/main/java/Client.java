@@ -1,3 +1,4 @@
+import java.nio.channels.ScatteringByteChannel;
 import java.util.*;
 
 import chess.*;
@@ -143,18 +144,23 @@ public class Client {
   }
 
   private ChessPosition getPositionFromInput(String param) {
-    if (param.length() != 2) {
-      printErrorMessage("Invalid position");
-      return null;
-    }
-    var move = param.toLowerCase();
-    int column = move.charAt(0) - 'a' + 1;
-    int row = Integer.parseInt(move.substring(1));
-    if (column < 1 || column > 8 || row < 1 || row > 8) {
+    try {
+      if (param.length() != 2) {
+        printErrorMessage("Invalid position");
+        return null;
+      }
+      var move=param.toLowerCase();
+      int column=move.charAt(0) - 'a' + 1;
+      int row=Integer.parseInt(move.substring(1));
+      if (column < 1 || column > 8 || row < 1 || row > 8) {
+        printErrorMessage("Invalid position: " + param);
+        return null;
+      }
+      return new ChessPosition(row, column);
+    } catch (NumberFormatException e) {
       printErrorMessage("Invalid position: " + param);
       return null;
     }
-    return new ChessPosition(row, column);
   }
 
   private String leaveGame() {

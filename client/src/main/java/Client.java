@@ -15,6 +15,7 @@ public class Client {
   private WebSocketFacade webSocketFacade = null;
   private ChessGame.TeamColor myColor = null;
   private ChessGame currentGame = null;
+  private String myUsername = null;
 
   private final ServerFacade server = new ServerFacade("http://localhost:8080");
 
@@ -305,7 +306,27 @@ public class Client {
   }
 
   public void printStatusMessage(String message) {
-    System.out.println("\n\n" + message);
+    System.out.println("\n" + message);
+    if (message.contains("resigned") || message.contains("won") || message.contains("draw")) {
+      currentGame.setGameOver(true);
+      currentGame.setWinner(determineWinner(message));
+    }
+  }
+
+  private ChessGame.TeamColor determineWinner(String message) {
+    if (message.contains("resigned")) {
+      if (message.toLowerCase().contains("white")) {
+        return ChessGame.TeamColor.BLACK;
+      }
+      return ChessGame.TeamColor.WHITE;
+    }
+    if (message.contains("won")) {
+      if (message.toLowerCase().contains("white")) {
+        return ChessGame.TeamColor.WHITE;
+      }
+      return ChessGame.TeamColor.BLACK;
+    }
+    return null;
   }
 
   private String register(String[] params) {

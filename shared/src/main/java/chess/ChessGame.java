@@ -270,7 +270,6 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         if (isInCheck(teamColor) || teamColor != teamTurn) {return false;}
         return noValidMoves(teamColor);
-
     }
 
     /**

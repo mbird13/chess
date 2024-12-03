@@ -76,7 +76,7 @@ public class WebSocketHandler {
       dataAccess.updateGame(newGameData.gameID(), newGameData);
 
       var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-              authData.username() + " has resigned the game");
+              authData.username() + " (" + userColor + ") has resigned the game");
       connectionHandler.notification(notification, command.getGameID());
 
     } catch (ResponseException e) {
@@ -93,7 +93,7 @@ public class WebSocketHandler {
       var game = gameData.game();
       var authData = dataAccess.getAuth(moveCommand.getAuthToken());
       if (!(authData.username().equals(gameData.whiteUsername()) || authData.username().equals(gameData.blackUsername()))) {
-        throw new ResponseException(500, "Unable to resign game as an observer");
+        throw new ResponseException(500, "Unable to make move as an observer");
       }
       var userColor =(Objects.equals(authData.username(), gameData.whiteUsername()))
               ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
@@ -109,6 +109,9 @@ public class WebSocketHandler {
       var moveMadeMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
               authData.username() + " moved " + moveToString(moveCommand.getMove()));
       connectionHandler.notification(moveMadeMessage, moveCommand.getGameID(), authData.username());
+
+      checkGameStatus(newGameData, userColor);
+
     } catch (ResponseException e) {
       ErrorMessage errorMessage =
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
@@ -117,6 +120,46 @@ public class WebSocketHandler {
       ErrorMessage errorMessage =
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move: To highlight valid moves type 'highlight' <START POSITION>");
       connectionHandler.errorMessage(errorMessage, session);
+    }
+  }
+
+  private void checkGameStatus(GameData game, ChessGame.TeamColor userColor) throws ResponseException, IOException {
+    if (game.game().isInStalemate(userColor)) {
+      game.game().setGameOver(true);
+      dataAccess.updateGame(game.gameID(), game);
+      var stalemateMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              "Stalemate: the game ended in a draw");
+      connectionHandler.notification(stalemateMessage, Integer.valueOf(game.gameID()));
+      return;
+    }
+    if (game.game().isInCheckmate(ChessGame.TeamColor.WHITE)) {
+      game.game().setGameOver(true);
+      game.game().setWinner(ChessGame.TeamColor.BLACK);
+      dataAccess.updateGame(game.gameID(), game);
+      var checkMateMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              "Checkmate: Black has won the game");
+      connectionHandler.notification(checkMateMessage, Integer.valueOf(game.gameID()));
+      return;
+    }
+    if (game.game().isInCheckmate(ChessGame.TeamColor.BLACK)) {
+      game.game().setGameOver(true);
+      game.game().setWinner(ChessGame.TeamColor.WHITE);
+      dataAccess.updateGame(game.gameID(), game);
+      var checkMateMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              "Checkmate: White has won the game");
+      connectionHandler.notification(checkMateMessage, Integer.valueOf(game.gameID()));
+      return;
+    }
+    if (game.game().isInCheck(ChessGame.TeamColor.WHITE)) {
+      var checkMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              "White is in check");
+      connectionHandler.notification(checkMessage, Integer.valueOf(game.gameID()));
+      return;
+    }
+    if (game.game().isInCheck(ChessGame.TeamColor.BLACK)) {
+      var checkMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+              "Black is in check");
+      connectionHandler.notification(checkMessage, Integer.valueOf(game.gameID()));
     }
   }
 

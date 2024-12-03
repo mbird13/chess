@@ -40,7 +40,7 @@ public class Client {
   }
 
   private String redraw() {
-    printGameBoard(currentGame.getBoard(), myColor);
+    printGameBoard(currentGame);
     return "";
   }
 

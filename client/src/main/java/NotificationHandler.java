@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -21,8 +22,8 @@ public class NotificationHandler {
   }
 
   private void error(String message) {
-    NotificationMessage errorMessage = new Gson().fromJson(message, NotificationMessage.class);
-    client.printErrorMessage(errorMessage.message);
+    ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+    client.printErrorMessage(errorMessage.errorMessage);
     client.printPrompt();
   }
 

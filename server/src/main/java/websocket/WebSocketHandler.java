@@ -59,7 +59,7 @@ public class WebSocketHandler {
   private void resign(Session session, UserGameCommand command) throws IOException {
     try {
       verifyAuthToken(command.getAuthToken());
-      verifyGame(command.getGameID());
+      verifyGameOver(command.getGameID());
       var gameData=dataAccess.getGame(String.valueOf(command.getGameID()));
       var game=gameData.game();
       var authData=dataAccess.getAuth(command.getAuthToken());
@@ -88,7 +88,7 @@ public class WebSocketHandler {
   private void makeMove(Session session, MakeMoveCommand moveCommand) throws IOException {
     try {
       verifyAuthToken(moveCommand.getAuthToken());
-      verifyGame(moveCommand.getGameID());
+      verifyGameOver(moveCommand.getGameID());
       var gameData = dataAccess.getGame(String.valueOf(moveCommand.getGameID()));
       var game = gameData.game();
       var authData = dataAccess.getAuth(moveCommand.getAuthToken());
@@ -147,9 +147,13 @@ public class WebSocketHandler {
 
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
       connectionHandler.loadGame(loadGameMessage, session);
-    } catch (IOException | ResponseException e) {
+    } catch (ResponseException e) {
       ErrorMessage errorMessage =
-              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Unable to join game.");
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+      connectionHandler.errorMessage(errorMessage, session);
+    } catch (IOException e) {
+      ErrorMessage errorMessage =
+              new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: unable to join game");
       connectionHandler.errorMessage(errorMessage, session);
     }
   }
@@ -206,6 +210,13 @@ public class WebSocketHandler {
   }
 
   private void verifyGame(Integer gameID) throws ResponseException {
+    GameData gameData = dataAccess.getGame(String.valueOf(gameID));
+    if (gameData == null) {
+      throw new ResponseException(401, "Game doesn't exist");
+    }
+  }
+
+  private void verifyGameOver(Integer gameID) throws ResponseException {
     GameData gameData = dataAccess.getGame(String.valueOf(gameID));
     if (gameData == null) {
       throw new ResponseException(401, "Game doesn't exist");

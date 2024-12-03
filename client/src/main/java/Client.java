@@ -182,6 +182,8 @@ public class Client {
         return "";
       }
       webSocketFacade.resign(authToken, currentGameId);
+      currentGame.setGameOver(true);
+      currentGame.setWinner(myColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
     } catch (ResponseException e) {
       printErrorMessage("Unable to resign");
     }
@@ -387,7 +389,7 @@ public class Client {
 
       }
       case InGame -> {
-        System.out.println("\n");
+        System.out.println();
         System.out.print("Make a move: ");
       }
       case Observer -> {
@@ -534,6 +536,13 @@ public class Client {
 
   public void printGameBoard(ChessGame game) {
     printGameBoard(game.getBoard(), myColor);
+    if (game.isGameOver()) {
+      if (game.getWinner() != null) {
+        printStatusMessage(String.format("%s has won the game", game.getWinner()));
+      } else {
+        printStatusMessage("The game ended in a draw");
+      }
+    }
   }
 
   public void setGame(ChessGame game) {

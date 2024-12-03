@@ -138,11 +138,13 @@ public class WebSocketHandler {
       verifyAuthToken(command.getAuthToken());
       verifyGame(command.getGameID());
       var authData= dataAccess.getAuth(command.getAuthToken());
+      var gameData = dataAccess.getGame(String.valueOf(command.getGameID()));
+      String role = getPlayerRole(gameData, authData);
+
       String message=String.format("%s has joined the game as %s", authData.username(), role);
       connectionHandler.notification(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), command.getGameID());
       connectionHandler.add(command.getGameID(), authData.username(), session);
 
-      var gameData = dataAccess.getGame(String.valueOf(command.getGameID()));
       var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
       connectionHandler.loadGame(loadGameMessage, session);
     } catch (IOException | ResponseException e) {
@@ -150,6 +152,16 @@ public class WebSocketHandler {
               new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Unable to join game.");
       connectionHandler.errorMessage(errorMessage, session);
     }
+  }
+
+  private String getPlayerRole(GameData gameData, AuthData authData) {
+    if (authData.username().equals(gameData.whiteUsername())) {
+      return "white";
+    }
+    if (authData.username().equals(gameData.blackUsername())) {
+      return "black";
+    }
+    return "observer";
   }
 
   private void leave(UserGameCommand command) throws ResponseException {
@@ -166,15 +178,13 @@ public class WebSocketHandler {
       if (oldGameData == null) {
         throw new ResponseException(400, "Error: bad request");
       }
-      GameData newGameData;
+      GameData newGameData = oldGameData;
       if (Objects.equals(oldGameData.whiteUsername(), user.username())) {
         newGameData = new GameData(oldGameData.gameID(),
                 null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
       } else if (Objects.equals(oldGameData.blackUsername(), user.username())) {
         newGameData = new GameData(oldGameData.gameID(),
                 oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
-      } else {
-        throw new ResponseException(400, "Error: bad request");
       }
 
       dataAccess.updateGame(String.valueOf(command.getGameID()), newGameData);
